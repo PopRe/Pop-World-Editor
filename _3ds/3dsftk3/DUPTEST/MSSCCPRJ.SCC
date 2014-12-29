@@ -1,0 +1,4 @@
+SCC = This is a Source Code Control file
+
+[duptest.mak]
+SCC_Project_Name = "$/3dsftk/duptest", TLPAAAAA

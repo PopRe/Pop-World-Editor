@@ -1,0 +1,1051 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_CN                  ICON                    "cn.ico"
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Portuguese (Brazil) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_PTB)
+#ifdef _WIN32
+LANGUAGE LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,2,0,0
+ PRODUCTVERSION 1,2,0,0
+ FILEFLAGSMASK 0x37L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "ALACN"
+            VALUE "FileDescription", "Populous World Editor"
+            VALUE "FileVersion", "1, 2, 0, 0"
+            VALUE "InternalName", "PopEdt"
+            VALUE "LegalCopyright", "ALACN"
+            VALUE "LegalTrademarks", "ALACN"
+            VALUE "OriginalFilename", "PopEdt.exe"
+            VALUE "ProductName", "Populous World Editor"
+            VALUE "ProductVersion", "1, 2, 0, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+RC_MANIFEST             RT_MANIFEST             "PopEdt.exe.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_BRUSH DIALOGEX 0, 0, 58, 87
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Brush"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Size",IDC_BRUSH_SIZE_TXT,7,6,44,8
+    CONTROL         "",IDC_BRUSH_SIZE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,7,14,44,13
+    LTEXT           "Speed",IDC_BRUSH_SPEED_TXT,7,33,44,8
+    CONTROL         "",IDC_BRUSH_SPEED,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,7,41,44,13
+    CONTROL         "Flatten",IDC_BRUSH_FLATTEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,60,44,10
+    CONTROL         "Smooth",IDC_BRUSH_SMOOTH,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,70,44,10
+END
+
+IDD_OBJECT DIALOGEX 0, 0, 106, 128
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Object"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_OBJECT_OWNER,7,7,92,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_OBJECT_TYPE,7,26,92,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_OBJECT_MODEL,7,45,92,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "New",IDC_OBJECT_NEW,7,64,42,14
+    PUSHBUTTON      "Delete",IDC_OBJECT_DELETE,57,64,42,14
+    PUSHBUTTON      "Options",IDC_OBJECT_OPTIONS,7,85,42,14
+    PUSHBUTTON      "Filter",IDC_OBJECT_FILTER,57,85,42,14
+    PUSHBUTTON      "Next",IDC_OBJECT_NEXT,7,106,42,15
+    PUSHBUTTON      "Prev",IDC_OBJECT_PREV,57,106,42,15
+END
+
+IDD_FILTER DIALOGEX 0, 0, 64, 170
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Filter"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Neutral",IDC_FILTER_NEUTRAL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,50,10
+    CONTROL         "Blue",IDC_FILTER_BLUE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,17,50,10
+    CONTROL         "Red",IDC_FILTER_RED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,27,50,10
+    CONTROL         "Yellow",IDC_FILTER_YELLOW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,37,50,10
+    CONTROL         "Green",IDC_FILTER_GREEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,47,50,10
+    CONTROL         "Persons",IDC_FILTER_PERSON,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,63,50,10
+    CONTROL         "Buildings",IDC_FILTER_BUILDING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,73,50,10
+    CONTROL         "Scenery",IDC_FILTER_SCENERY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,83,50,10
+    CONTROL         "General",IDC_FILTER_GENERAL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,93,50,10
+    CONTROL         "Vehicle",IDC_FILTER_VEHICLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,103,50,10
+    CONTROL         "Spell",IDC_FILTER_SPELL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,113,50,10
+    CONTROL         "Unknows",IDC_FILTER_UNKNOW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,133,50,10
+    PUSHBUTTON      "All",IDC_FILTER_ALL,7,149,50,14
+    CONTROL         "Effect",IDC_FILTER_EFFECT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,123,50,10
+END
+
+IDD_DISCOVERY DIALOGEX 0, 0, 106, 81
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Discovery"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_DISCOVERY_AVAILABILITY,7,7,92,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DISCOVERY_TYPE,7,26,92,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DISCOVERY_MODEL,7,44,92,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_DISCOVERY_MANA,7,62,92,12,ES_AUTOHSCROLL | ES_NUMBER
+END
+
+IDD_DEVICE DIALOGEX 0, 0, 118, 82
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Screen Mode"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_DEVICE_DEVICES,7,7,104,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_DEVICE_MODES,7,26,104,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Full Screen",IDC_DEVICE_FULLSCREEN,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,45,51,10
+    PUSHBUTTON      "Apply",IDC_DEVICE_APPLY,33,61,50,14
+END
+
+IDD_TRIGGER DIALOGEX 0, 0, 110, 139
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Trigger"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Type",IDC_TRIGGER_TYPE_TXT,7,7,17,8
+    COMBOBOX        IDC_TRIGGER_TYPE,7,15,96,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Cell Radius",IDC_TRIGGER_CELLRADIUS_TXT,7,33,36,8
+    EDITTEXT        IDC_TRIGGER_CELLRADIUS,7,41,46,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Occurences",IDC_TRIGGER_OCCURENCES_TXT,7,59,38,8
+    EDITTEXT        IDC_TRIGGER_OCCURENCES,7,67,46,12,ES_AUTOHSCROLL
+    LTEXT           "Trigger Count",IDC_TRIGGER_COUNT_TXT,7,85,45,8
+    EDITTEXT        IDC_TRIGGER_COUNT,7,93,46,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Pray Time",IDC_TRIGGER_PRAY_TXT,57,33,32,8
+    EDITTEXT        IDC_TRIGGER_PRAY,57,41,46,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Inactive Time",IDC_TRIGGER_INACTIVETIME_TXT,57,59,44,8
+    EDITTEXT        IDC_TRIGGER_INACTIVETIME,57,67,46,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Start Inactive",IDC_TRIGGER_STARTINACTIVE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,112,60,10
+    CONTROL         "Create Player Owned",IDC_TRIGGER_CREATEOWNED,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,122,85,10
+    PUSHBUTTON      "Links",IDC_TRIGGER_LINKS,57,91,46,14
+END
+
+IDD_DEVICECONFIRM DIALOGEX 0, 0, 118, 41
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
+CAPTION "Screen Mode"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Restore",IDCANCEL,61,20,50,14
+    PUSHBUTTON      "OK",IDOK,7,20,50,14
+    LTEXT           "Device",IDC_DEVICECONFIRM_TXT,7,7,104,8
+END
+
+IDD_LINK DIALOGEX 0, 0, 125, 81
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Link"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_LINK_LIST,7,7,80,50,LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "Back",IDC_LINK_BACK,51,60,36,14
+    PUSHBUTTON      "Link",IDC_LINK_LINK,7,60,36,14
+    PUSHBUTTON      "up",IDC_LINK_UP,93,7,25,14
+    PUSHBUTTON      "down",IDC_LINK_DOWN,93,25,25,14
+    PUSHBUTTON      "del",IDC_LINK_DEL,93,43,25,14
+END
+
+IDD_LIST DIALOGEX 0, 0, 120, 120
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Objects"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_LIST_LIST,7,7,106,86,LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "Filter",IDC_LIST_FILTER,34,99,50,14
+END
+
+IDD_ABOUT DIALOGEX 0, 0, 150, 118
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Populous World Editor"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,49,96,50,14
+    LTEXT           "programmed by ALACN",IDC_STATIC,7,7,88,8
+    LTEXT           "alacn@bol.com.br",IDC_STATIC,7,15,88,8
+    LTEXT           "uhahaa@msn.com",IDC_STATIC,7,23,88,8
+    LTEXT           "http://www.strategyplanet.com/populous",IDC_ABOUT_LINK,
+                    7,59,135,8
+    LTEXT           "Version: ---",IDC_ABOUT_VERSION,7,73,135,8
+    LTEXT           "Date: ---",IDC_ABOUT_DATE,8,81,135,8
+    ICON            IDI_CN,IDC_STATIC,122,7,21,20
+    LTEXT           "help file written by Khickman",IDC_STATIC,7,37,136,8
+    LTEXT           "khickman@strategyplanet.com",IDC_STATIC,7,45,136,8
+END
+
+IDD_SPELLS_BUILDINGS DIALOGEX 0, 0, 242, 122
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Spells / Buildings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " Spells ",IDC_SPELLS_SPELLS,7,7,145,108
+    CONTROL         "Blast",IDC_SPELL_BLAST,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,19,63,10
+    CONTROL         "Lightning",IDC_SPELL_LIGHTNING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,29,63,10
+    CONTROL         "Tornado",IDC_SPELL_TORNADO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,39,63,10
+    CONTROL         "Swarm",IDC_SPELL_SWARM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,49,63,10
+    CONTROL         "Invisibility",IDC_SPELL_INVISIBILITY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,59,63,10
+    CONTROL         "Hypnotism",IDC_SPELL_HYPNOTISM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,69,63,10
+    CONTROL         "FireStorm",IDC_SPELL_FIRESTORM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,79,63,10
+    CONTROL         "Ghost Army",IDC_SPELL_GHOST,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,89,63,10
+    CONTROL         "Erode",IDC_SPELL_ERODE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,99,63,10
+    CONTROL         "Swamp",IDC_SPELL_SWAMP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,19,63,10
+    CONTROL         "Land Bridge",IDC_SPELL_LANDBRIDGE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,29,63,10
+    CONTROL         "Angel of Death",IDC_SPELL_AOD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,39,63,10
+    CONTROL         "EarthQuake",IDC_SPELL_EARTHQUAKE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,49,63,10
+    CONTROL         "Flatten",IDC_SPELL_FLATTEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,59,63,10
+    CONTROL         "Volcano",IDC_SPELL_VOLCANO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,69,63,10
+    CONTROL         "Convert",IDC_SPELL_CONVERT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,79,63,10
+    CONTROL         "Magical Shield",IDC_SPELL_MAGICALSHIELD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,89,63,10
+    GROUPBOX        " Buildings ",IDC_BUILDING_BUILDINGS,158,7,77,108
+    CONTROL         "Hut",IDC_BUILDING_HUT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,19,63,10
+    CONTROL         "Tower",IDC_BUILDING_TOWER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,29,63,10
+    CONTROL         "Temple",IDC_BUILDING_TEMPLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,39,63,10
+    CONTROL         "Spy",IDC_BUILDING_SPY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,49,63,10
+    CONTROL         "Warrior",IDC_BUILDING_WARRIOR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,59,63,10
+    CONTROL         "FireWarrior",IDC_BUILDING_FIREWARRIOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,164,69,63,10
+    CONTROL         "Boat House",IDC_BUILDING_BOAT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,79,63,10
+    CONTROL         "Ballon Hut",IDC_BUILDING_BALLON,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,164,89,63,10
+END
+
+IDD_ALLIES DIALOGEX 0, 0, 138, 150
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Allies"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " Blue ",IDC_ALLIES_BLUE,6,6,60,66
+    CONTROL         "Blue",IDC_ALLIES_BLUE_BLUE,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,12,18,50,10
+    CONTROL         "Red",IDC_ALLIES_BLUE_RED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,30,50,10
+    CONTROL         "Yellow",IDC_ALLIES_BLUE_YELLOW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,42,50,10
+    CONTROL         "Green",IDC_ALLIES_BLUE_GREEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,54,50,10
+    GROUPBOX        " Red ",IDC_ALLIES_RED,72,6,60,66
+    CONTROL         "Blue",IDC_ALLIES_RED_BLUE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,18,50,10
+    CONTROL         "Red",IDC_ALLIES_RED_RED,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,78,30,50,10
+    CONTROL         "Yellow",IDC_ALLIES_RED_YELLOW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,42,50,10
+    CONTROL         "Green",IDC_ALLIES_RED_GREEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,54,50,10
+    GROUPBOX        " Yellow ",IDC_ALLIES_YELLOW,6,78,60,66
+    CONTROL         "Blue",IDC_ALLIES_YELLOW_BLUE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,90,50,10
+    CONTROL         "Red",IDC_ALLIES_YELLOW_RED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,102,50,10
+    CONTROL         "Yellow",IDC_ALLIES_YELLOW_YELLOW,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,12,114,50,10
+    CONTROL         "Green",IDC_ALLIES_YELLOW_GREEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,126,50,10
+    GROUPBOX        " Green ",IDC_ALLIES_GREEN,72,78,60,66
+    CONTROL         "Blue",IDC_ALLIES_GREEN_BLUE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,90,50,10
+    CONTROL         "Red",IDC_ALLIES_GREEN_RED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,102,50,10
+    CONTROL         "Yellow",IDC_ALLIES_GREEN_YELLOW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,78,114,50,10
+    CONTROL         "Green",IDC_ALLIES_GREEN_GREEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,78,126,50,10
+END
+
+IDD_SPELLS_NOT_CHARGING DIALOGEX 0, 0, 145, 94
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Spells not charging"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Blast",IDC_SPELL_BLAST,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,60,10
+    CONTROL         "Lightning",IDC_SPELL_LIGHTNING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,17,60,10
+    CONTROL         "Tornado",IDC_SPELL_TORNADO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,27,60,10
+    CONTROL         "Swarm",IDC_SPELL_SWARM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,37,60,10
+    CONTROL         "Invisibility",IDC_SPELL_INVISIBILITY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,47,60,10
+    CONTROL         "Hypnotism",IDC_SPELL_HYPNOTISM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,57,60,10
+    CONTROL         "FireStorm",IDC_SPELL_FIRESTORM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,67,60,10
+    CONTROL         "Erode",IDC_SPELL_ERODE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,77,60,10
+    CONTROL         "Swamp",IDC_SPELL_SWAMP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,7,60,10
+    CONTROL         "Land Bridge",IDC_SPELL_LANDBRIDGE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,78,17,60,10
+    CONTROL         "Angel of Death",IDC_SPELL_AOD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,27,60,10
+    CONTROL         "EarthQuake",IDC_SPELL_EARTHQUAKE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,78,37,60,10
+    CONTROL         "Flatten",IDC_SPELL_FLATTEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,47,60,10
+    CONTROL         "Volcano",IDC_SPELL_VOLCANO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,57,60,10
+    CONTROL         "Convert",IDC_SPELL_CONVERT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,78,67,60,10
+    CONTROL         "Magical Shield",IDC_SPELL_MAGICALSHIELD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,78,77,60,10
+END
+
+IDD_HEADER DIALOGEX 0, 0, 155, 119
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Header"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "&Level Name",IDC_HEADER_TXT_LEVEL_NAME,7,7,38,8
+    EDITTEXT        IDC_HEADER_LEVEL_NAME,7,17,85,12,ES_AUTOHSCROLL
+    LTEXT           "&Num Players",IDC_HEADER_TXT_N_PLAYERS,7,35,40,8
+    EDITTEXT        IDC_HEADER_N_PLAYERS,7,45,85,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    GROUPBOX        " &Flags ",IDC_STATIC,7,62,85,49
+    CONTROL         "God Mode",IDC_HEADER_GOD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,75,71,10
+    CONTROL         "Fog of War",IDC_HEADER_FOG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,85,71,10
+    CONTROL         "No Guest Spells",IDC_HEADER_NO_GUEST,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,95,71,10
+    GROUPBOX        " &AI ",IDC_STATIC,100,7,48,105
+    LTEXT           "&Red",IDC_HEADER_TXT_CP_RED,106,19,14,8
+    EDITTEXT        IDC_HEADER_CP_RED,106,29,34,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "&Yellow",IDC_HEADER_TXT_CP_YELLOW,106,49,21,8
+    EDITTEXT        IDC_HEADER_CP_YELLOW,106,59,34,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "&Green",IDC_HEADER_TXT_CP_GREEN,106,77,20,8
+    EDITTEXT        IDC_HEADER_CP_GREEN,106,87,34,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+END
+
+IDD_OBJ_BANK DIALOGEX 0, 0, 90, 71
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Object Bank"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_OBJ_BANK,7,52,76,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+END
+
+IDD_MAP_TYPE DIALOGEX 0, 0, 94, 102
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Map Type"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_MAP_TYPE,7,83,80,100,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+END
+
+IDD_INFO DIALOGEX 0, 0, 157, 208
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Map Info"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "",IDC_STATIC,7,7,143,50
+    LTEXT           "File Name:",IDC_STATIC,13,27,43,8
+    EDITTEXT        IDC_INFO_FILENAME,55,27,87,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
+    LTEXT           "Path:",IDC_STATIC,13,39,43,8
+    EDITTEXT        IDC_INFO_PATH,55,39,87,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    GROUPBOX        "",IDC_STATIC,7,64,143,70
+    LTEXT           "Objects:",IDC_STATIC,13,72,43,8
+    LTEXT           "-",IDC_INFO_OBJ_COUNT,65,72,70,8
+    LTEXT           "Trees:",IDC_STATIC,13,80,43,8
+    LTEXT           "-",IDC_INFO_TREE_COUNT,65,80,70,8
+    LTEXT           "Wildmans:",IDC_STATIC,13,88,43,8
+    LTEXT           "-",IDC_INFO_WILDMAN_COUNT,65,88,70,8
+    LTEXT           "StoneHeads:",IDC_STATIC,13,96,43,8
+    LTEXT           "-",IDC_INFO_STONEHEAD_COUNT,65,96,70,8
+    LTEXT           "Vaults:",IDC_STATIC,13,104,43,8
+    LTEXT           "-",IDC_INFO_KNOWLEDGE_COUNT,65,104,70,8
+    LTEXT           "Discovery:",IDC_STATIC,13,112,43,8
+    LTEXT           "-",IDC_INFO_DISCOVERY_COUNT,65,112,70,8
+    LTEXT           "Triggers:",IDC_STATIC,13,120,43,8
+    LTEXT           "-",IDC_INFO_TRIGGER_COUNT,65,120,70,8
+    GROUPBOX        "",IDC_STATIC,7,139,143,62
+    LTEXT           "Population",IDC_STATIC,46,147,40,8
+    LTEXT           "Buildings",IDC_STATIC,92,147,40,8
+    LTEXT           "Blue:",IDC_STATIC,13,155,29,8
+    CTEXT           "-",IDC_INFO_POP_BLUE,46,155,30,8
+    CTEXT           "-",IDC_INFO_BLG_BLUE,92,155,30,8
+    LTEXT           "Red:",IDC_STATIC,13,163,29,8
+    CTEXT           "-",IDC_INFO_POP_RED,46,163,30,8
+    CTEXT           "-",IDC_INFO_BLG_RED,92,163,30,8
+    LTEXT           "Yellow:",IDC_STATIC,13,171,29,8
+    CTEXT           "-",IDC_INFO_POP_YELLOW,46,171,30,8
+    CTEXT           "-",IDC_INFO_BLG_YELLOW,92,171,30,8
+    LTEXT           "Green:",IDC_STATIC,13,179,29,8
+    CTEXT           "-",IDC_INFO_POP_GREEN,46,179,30,8
+    CTEXT           "-",IDC_INFO_BLG_GREEN,92,179,30,8
+    LTEXT           "Neutral:",IDC_STATIC,13,187,29,8
+    CTEXT           "-",IDC_INFO_POP_NEUTRAL,46,187,30,8
+    CTEXT           "-",IDC_INFO_BLG_NEUTRAL,92,187,30,8
+    LTEXT           "Level Name:",IDC_STATIC,13,15,40,8
+    LTEXT           "-",IDC_INFO_LEVEL_NAME,57,15,87,8
+END
+
+IDD_SWAP_TRIBE DIALOGEX 0, 0, 127, 214
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Swap Tribe"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "",IDC_STATIC,7,7,54,78
+    CONTROL         "Blue",IDC_SWAPTRIBE_BLUE1,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,13,19,42,10
+    CONTROL         "Red",IDC_SWAPTRIBE_RED1,"Button",BS_AUTORADIOBUTTON,13,
+                    31,42,10
+    CONTROL         "Yellow",IDC_SWAPTRIBE_YELLOW1,"Button",
+                    BS_AUTORADIOBUTTON,13,43,42,10
+    CONTROL         "Green",IDC_SWAPTRIBE_GREEN1,"Button",BS_AUTORADIOBUTTON,
+                    13,55,42,10
+    CONTROL         "Neutral",IDC_SWAPTRIBE_NEUTRAL1,"Button",
+                    BS_AUTORADIOBUTTON,13,67,42,10
+    CONTROL         "Swap Two",IDC_SWAPTRIBE_SWAP2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,174,50,10
+    PUSHBUTTON      "Swap",IDC_SWAPTRIBE_SWAP,38,192,50,14
+    GROUPBOX        "",IDC_STATIC,66,7,54,78
+    CONTROL         "Blue",IDC_SWAPTRIBE_BLUE2,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,72,19,42,10
+    CONTROL         "Red",IDC_SWAPTRIBE_RED2,"Button",BS_AUTORADIOBUTTON,72,
+                    31,42,10
+    CONTROL         "Yellow",IDC_SWAPTRIBE_YELLOW2,"Button",
+                    BS_AUTORADIOBUTTON,72,43,42,10
+    CONTROL         "Green",IDC_SWAPTRIBE_GREEN2,"Button",BS_AUTORADIOBUTTON,
+                    72,55,42,10
+    CONTROL         "Neutral",IDC_SWAPTRIBE_NEUTRAL2,"Button",
+                    BS_AUTORADIOBUTTON,72,67,42,10
+    GROUPBOX        "",IDC_STATIC,7,90,54,78
+    CONTROL         "Blue",IDC_SWAPTRIBE_BLUE3,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,13,102,42,10
+    CONTROL         "Red",IDC_SWAPTRIBE_RED3,"Button",BS_AUTORADIOBUTTON,13,
+                    114,42,10
+    CONTROL         "Yellow",IDC_SWAPTRIBE_YELLOW3,"Button",
+                    BS_AUTORADIOBUTTON,13,126,42,10
+    CONTROL         "Green",IDC_SWAPTRIBE_GREEN3,"Button",BS_AUTORADIOBUTTON,
+                    13,138,42,10
+    CONTROL         "Neutral",IDC_SWAPTRIBE_NEUTRAL3,"Button",
+                    BS_AUTORADIOBUTTON,13,150,42,10
+    GROUPBOX        "",IDC_STATIC,66,90,54,78
+    CONTROL         "Blue",IDC_SWAPTRIBE_BLUE4,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,72,102,42,10
+    CONTROL         "Red",IDC_SWAPTRIBE_RED4,"Button",BS_AUTORADIOBUTTON,72,
+                    114,42,10
+    CONTROL         "Yellow",IDC_SWAPTRIBE_YELLOW4,"Button",
+                    BS_AUTORADIOBUTTON,72,126,42,10
+    CONTROL         "Green",IDC_SWAPTRIBE_GREEN4,"Button",BS_AUTORADIOBUTTON,
+                    72,138,42,10
+    CONTROL         "Neutral",IDC_SWAPTRIBE_NEUTRAL4,"Button",
+                    BS_AUTORADIOBUTTON,72,150,42,10
+END
+
+IDD_MARKERS DIALOGEX 0, 0, 88, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Markers"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Marker:",IDC_STATIC,7,7,40,8
+    LTEXT           "Position:",IDC_STATIC,7,18,40,8
+    PUSHBUTTON      "Next",IDC_MARKERS_NEXT,7,34,35,14
+    PUSHBUTTON      "Prev",IDC_MARKERS_PREV,46,34,35,14
+    LTEXT           "-",IDC_MARKERS_N,50,7,30,8
+    LTEXT           "-",IDC_MARKERS_POS,50,18,30,8
+END
+
+IDD_AI_ATTRIB DIALOGEX 0, 0, 242, 224
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "AI Attributes"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        " Computer Player Name ",IDC_STATIC,7,7,228,35
+    EDITTEXT        IDC_AI_CP_NAME,14,18,213,14,ES_AUTOHSCROLL
+    GROUPBOX        " Attributes ",IDC_STATIC,7,48,179,53
+    COMBOBOX        IDC_AI_ATTRIB_LIST,14,58,166,99,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_AI_ATTRIB,14,77,166,14,ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        " Spells ",IDC_SPELLS_SPELLS,7,109,145,108
+    CONTROL         "Blast",IDC_SPELL_BLAST,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,120,63,10
+    CONTROL         "Lightning",IDC_SPELL_LIGHTNING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,130,63,10
+    CONTROL         "Tornado",IDC_SPELL_TORNADO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,141,63,10
+    CONTROL         "Swarm",IDC_SPELL_SWARM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,151,63,10
+    CONTROL         "Invisibility",IDC_SPELL_INVISIBILITY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,160,63,10
+    CONTROL         "Hypnotism",IDC_SPELL_HYPNOTISM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,170,63,10
+    CONTROL         "FireStorm",IDC_SPELL_FIRESTORM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,181,63,10
+    CONTROL         "Ghost Army",IDC_SPELL_GHOST,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,191,63,10
+    CONTROL         "Erode",IDC_SPELL_ERODE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,200,63,10
+    CONTROL         "Swamp",IDC_SPELL_SWAMP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,120,63,10
+    CONTROL         "Land Bridge",IDC_SPELL_LANDBRIDGE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,130,63,10
+    CONTROL         "Angel of Death",IDC_SPELL_AOD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,141,63,10
+    CONTROL         "EarthQuake",IDC_SPELL_EARTHQUAKE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,151,63,10
+    CONTROL         "Flatten",IDC_SPELL_FLATTEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,160,63,10
+    CONTROL         "Volcano",IDC_SPELL_VOLCANO,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,170,63,10
+    CONTROL         "Convert",IDC_SPELL_CONVERT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,83,181,63,10
+    CONTROL         "Magical Shield",IDC_SPELL_MAGICALSHIELD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,83,191,63,10
+    GROUPBOX        " Buildings ",IDC_BUILDING_BUILDINGS,158,109,77,108
+    CONTROL         "Hut",IDC_BUILDING_HUT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,120,63,10
+    CONTROL         "Tower",IDC_BUILDING_TOWER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,130,63,10
+    CONTROL         "Temple",IDC_BUILDING_TEMPLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,141,63,10
+    CONTROL         "Spy",IDC_BUILDING_SPY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,151,63,10
+    CONTROL         "Warrior",IDC_BUILDING_WARRIOR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,160,63,10
+    CONTROL         "FireWarrior",IDC_BUILDING_FIREWARRIOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,164,170,63,10
+    CONTROL         "Boat House",IDC_BUILDING_BOAT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,181,63,10
+    CONTROL         "Ballon Hut",IDC_BUILDING_BALLON,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,164,191,63,10
+    PUSHBUTTON      "New",IDC_AI_NEW,196,50,39,14
+    PUSHBUTTON      "Open",IDC_AI_OPEN,196,68,39,14
+    PUSHBUTTON      "Save",IDC_AI_SAVE,196,86,39,14
+END
+
+IDD_AI_SCRIPT DIALOGEX 0, 0, 166, 88
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "AI Script"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Compile",IDC_AI_COMPILE,"Button",BS_AUTORADIOBUTTON,25,
+                    7,50,10
+    CONTROL         "Decompile",IDC_AI_DECOMPILE,"Button",BS_AUTORADIOBUTTON,
+                    90,7,50,10
+    PUSHBUTTON      "Log",IDC_AI_LOG,108,24,50,14
+    PUSHBUTTON      "Source",IDC_AI_SRC,108,42,50,14
+    PUSHBUTTON      "Destiny",IDC_AI_DST,108,60,50,14
+    EDITTEXT        IDC_AI_EDT_LOG,7,24,96,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_AI_EDT_SRC,7,42,96,14,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_AI_EDT_DST,7,60,96,14,ES_AUTOHSCROLL | ES_READONLY
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_BRUSH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 51
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 80
+    END
+
+    IDD_OBJECT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 99
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 121
+    END
+
+    IDD_FILTER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 57
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_DISCOVERY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 99
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 74
+    END
+
+    IDD_DEVICE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 111
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
+    END
+
+    IDD_TRIGGER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 103
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 132
+    END
+
+    IDD_DEVICECONFIRM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 111
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 34
+    END
+
+    IDD_LINK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 118
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 74
+    END
+
+    IDD_LIST, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 113
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 113
+    END
+
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 143
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 110
+    END
+
+    IDD_SPELLS_BUILDINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 235
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 115
+    END
+
+    IDD_ALLIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 132
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_SPELLS_NOT_CHARGING, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 138
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    IDD_HEADER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 148
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 112
+    END
+
+    IDD_OBJ_BANK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 83
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_MAP_TYPE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 87
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+    END
+
+    IDD_INFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 150
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 201
+    END
+
+    IDD_SWAP_TRIBE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 120
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 207
+    END
+
+    IDD_MARKERS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 81
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_AI_ATTRIB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 235
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 217
+    END
+
+    IDD_AI_SCRIPT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 159
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 81
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+ID_FILE MENU 
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "New\tCtrl + N",               ID_FILE_LEVEL_NEW
+        MENUITEM "Open\tCtrl + O",              ID_FILE_LEVEL_OPEN
+        MENUITEM "Save\tCtrl + S",              ID_FILE_LEVEL_SAVE
+        MENUITEM "Save As...\tCtrl + Shift + S", ID_FILE_LEVEL_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "Export Height Map",           ID_FILE_EXPORTHEIGHTMAP
+        MENUITEM SEPARATOR
+        MENUITEM "Exit\tEsc",                   ID_FILE_EXIT
+    END
+END
+
+ID_EDIT MENU 
+BEGIN
+    POPUP "Edit"
+    BEGIN
+        MENUITEM "Landscape\tF5",               ID_EDIT_LANDSCAPE
+        MENUITEM "Objects\tF6",                 ID_EDIT_OBJECTS
+        MENUITEM "Markers\tF7",                 ID_EDIT_MARKERS
+        MENUITEM SEPARATOR
+        POPUP "Header"
+        BEGIN
+            MENUITEM "Available Spells/Buildings",  ID_HEADER_AVAILABLE_SPELLS_BUILDINGS
+
+            MENUITEM "Spells not charging",         ID_HEADER_SPELLSNOTCHARGING
+
+            MENUITEM "Allies",                      ID_HEADER_ALLIES
+            MENUITEM "General",                     ID_HEADER_GENERAL
+            MENUITEM "Object Bank",                 ID_HEADER_OBJECTBANK
+            MENUITEM "Map Texture",                 ID_HEADER_MAPTEXTURE
+        END
+        POPUP "AI Script"
+        BEGIN
+            MENUITEM "Attributes",                  ID_AISCRIPT_ATTRIBUTES
+            MENUITEM "Script",                      ID_AISCRIPT_SCRIPT
+        END
+        POPUP "Language"
+        BEGIN
+            MENUITEM "Language To Plain Text",      ID_LANGUAGE_LANG2TEXT
+            MENUITEM "Plain Text To Language",      ID_LANGUAGE_TEXT2LANG
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Swap Tribe",                  ID_EDIT_SWAPTRIBE
+    END
+END
+
+ID_OPTIONS MENU 
+BEGIN
+    POPUP "Options"
+    BEGIN
+        MENUITEM "Object List\tF4",             ID_OPTIONS_OBJECTLIST
+        MENUITEM "Brush\tF3",                   ID_OPTIONS_BRUSH
+        MENUITEM "Info",                        ID_OPTIONS_INFO
+        MENUITEM SEPARATOR
+        MENUITEM "Hide Objects",                ID_OPTIONS_HIDEOBJECTS
+        MENUITEM "Bounding Box",                ID_OPTIONS_BOUNDINGBOX
+        MENUITEM "Show Markers",                ID_OPTIONS_SHOW_MARKERS
+        POPUP "Graphics"
+        BEGIN
+            MENUITEM "Dithering",                   ID_OPTIONS_DITHER
+            MENUITEM "Texture Filter",              ID_OPTIONS_TEXTURE_FILTER
+
+            MENUITEM "Show Frame Rate",             ID_OPTIONS_FRAMERATE
+        END
+        POPUP "MiniMap"
+        BEGIN
+            MENUITEM "Show MiniMap",                ID_OPTIONS_MINIMAP_SHOW
+            MENUITEM "Transparent MiniMap",         ID_OPTIONS_MINIMAP_TRANSPARENT
+
+            MENUITEM "Hide Objects",                ID_OPTIONS_MINIMAP_HIDEOBJECTS
+
+        END
+        POPUP "Grid"
+        BEGIN
+            MENUITEM "Show Grid",                   ID_OPTIONS_SHOWGRID
+            MENUITEM "Grid See Through",            ID_OPTIONS_GRIDSEETHROUGH
+
+        END
+        POPUP "Wireframe"
+        BEGIN
+            MENUITEM "Wireframe Land",              ID_OPTIONS_WIREFRAME_LAND
+
+            MENUITEM "Wireframe Objects",           ID_OPTIONS_WIREFRAME_OBJS
+
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Screen Mode\tF9",             ID_OPTIONS_SCREENMODE
+        MENUITEM SEPARATOR
+        MENUITEM "Help\tF1",                    ID_OPTIONS_HELP
+        MENUITEM "About",                       ID_OPTIONS_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR ACCELERATORS 
+BEGIN
+    VK_F3,          ID_ACCEL_DLGBRUSH,      VIRTKEY, NOINVERT
+    VK_F9,          ID_ACCEL_DLGDEVICE,     VIRTKEY, NOINVERT
+    VK_F4,          ID_ACCEL_DLGLIST,       VIRTKEY, NOINVERT
+    VK_F1,          ID_ACCEL_HELP,          VIRTKEY, NOINVERT
+    VK_F5,          ID_ACCEL_LAND,          VIRTKEY, NOINVERT
+    VK_F2,          ID_ACCEL_MENUBAR,       VIRTKEY, NOINVERT
+    "N",            ID_ACCEL_NEW,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_ACCEL_OBJECTS,       VIRTKEY, NOINVERT
+    "O",            ID_ACCEL_OPEN,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_ACCEL_SAVE,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_ACCEL_SAVE_AS,       VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    VK_F7,          ID_ACCEL_MARKERS,       VIRTKEY, NOINVERT
+END
+
+#endif    // Portuguese (Brazil) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
