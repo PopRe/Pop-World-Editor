@@ -1,4 +1,3 @@
-
 /*
 
 Alacn
@@ -6,16 +5,14 @@ alacn.uhahaa@gmail.com
 http://alacn.dnsalias.org:8080/
 
 */
-
-#define MAX_THINGS							2000
+#pragma once
+#define MAX_THINGS							8000
 #define MAX_THINGS_LOAD						100
 #define	MAX_MANA_VALUE						1000000
 
 #define LEVEL_PREFIX						".dat"
 #define HEADER_PREFIX						".hdr"
 #define VERSION_PREFIX						".ver"
-
-
 
 // -=-=- obj bank -=-=-
 #define SZ_OBJ_BANK_0						"bank 0"
@@ -520,6 +517,7 @@ http://alacn.dnsalias.org:8080/
 #define M_EFFECT_STATUE_TO_AOD				91
 #define M_EFFECT_FILL_ONE_SHOTS				92
 #define M_EFFECT_FIRE_ROLL_ELEM				93 // no effect?
+#define	M_EFFECT_ARMA_ARENA					94
 //
 #define SZ_EFFECT_SIMPLE_BLAST				"simple blast"
 #define SZ_EFFECT_SPRITE_CIRCLES			"circles"
@@ -598,6 +596,7 @@ http://alacn.dnsalias.org:8080/
 #define SZ_EFFECT_ATLANTIS_INVOKE			"atlantis invoke"
 #define SZ_EFFECT_STATUE_TO_AOD				"statue to aod"
 #define SZ_EFFECT_FILL_ONE_SHOTS			"fill one shots"
+#define SZ_EFFECT_ARMA_ARENA				"arma arena"
 
 // - shot -
 /*
@@ -795,7 +794,8 @@ struct PLAYERTHINGS
 	UBYTE						Flags;
 };
 
-
+#define	MAX_LENGTH_SAVE_NAMEv2				(32)
+#define	MAX_NUM_SCRIPT2						10
 struct LEVELHEADER
 {
 	PLAYERTHINGS				DefaultThings;
@@ -810,6 +810,11 @@ struct LEVELHEADER
 	UWORD						Markers[256];
 	UWORD						StartPos;
 	UWORD						StartAngle;
+	UBYTE						Version;								// How many objects are in the level
+	ULONG						MaxAltPoints;							// How many points are in the level
+	ULONG						MaxNumObjects;							// How many objects are in the level
+	ULONG						MaxNumPlayers;							// How many players are in the level
+	CHAR						Script2[MAX_NUM_SCRIPT2][MAX_LENGTH_SAVE_NAMEv2];
 };
 
 
@@ -900,6 +905,15 @@ struct THINGSAVE
 	};
 };
 
+struct LEVELDATv3
+{
+	char						MAGIC[5];
+	struct LEVELHEADER			Header;
+	WORD						GroundHeight[128 * 128];
+	BYTE						NoAccessSquares[128 * 128];
+	PLAYERSAVEINFO				psi[4];
+	SUNLIGHTSAVEINFO			ssi;
+};
 
 struct LEVELDAT
 {
@@ -917,7 +931,7 @@ struct LEVELDAT
 struct LEVELVERSION
 {
 	SLONG						VersionNum;
-	CHAR						CreatedBy[32];
+	CHAR						CreatedBy[50];
 	CHAR						CreatedOn[28];
 	SLONG						CheckSum;
 };

@@ -12,7 +12,8 @@ http://alacn.dnsalias.org:8080/
 #define D3D_OVERLOADS
 #include <ddraw.h>
 #include <d3d.h>
-
+#include <vector>
+#include "Pop.h"
 
 
 #define COLOR_RENDER_BG			0x007CF0
@@ -247,9 +248,9 @@ extern bool						fHwDevice;
 extern LPDIRECTDRAW7			lpDD;
 extern LPDIRECTDRAWSURFACE7		lpDDSPrimary,
 								lpDDSBackBuffer;
+extern LEVELDATv3				*leveldat;
 extern LPDIRECT3DDEVICE7		lpD3DDevice;
 extern WORD						wEngineGround[GROUND_X_SIZE * GROUND_Z_SIZE];
-extern LEVELHEADER				LevelHeader;
 extern MARKER					Markers[256];
 extern int						MarkerSelected;
 extern LEVELVERSION				LevelVersion;
@@ -280,6 +281,8 @@ extern POINT					ptCursor,
 								ptCaptured;
 extern MOUSEBUTTON				MouseButton;
 extern DWORD					LANDSCAPE_COLORS[256];
+
+extern std::vector<THINGSAVE> Objects;
 
 
 

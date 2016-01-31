@@ -7,8 +7,8 @@ http://alacn.dnsalias.org:8080/
 
 */
 
-#define APPNAME					"Populous World Editor"
-#define POPEDT_VERSION			"1.2.0.0"
+#define APPNAME					"Populous World Editor For Levelv3"
+#define POPEDT_VERSION			"1.2.1.0"
 
 #define STR_SIZE  256
 

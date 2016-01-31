@@ -27,6 +27,7 @@
 #define IDD_MARKERS                     169
 #define IDD_AI_ATTRIB                   170
 #define IDD_AI_SCRIPT                   171
+#define IDD_SCRIPT2			            182
 #define ID_FILE                         300
 #define ID_FILE_LEVEL_OPEN              301
 #define ID_FILE_LEVEL_SAVE_AS           302
@@ -260,6 +261,27 @@
 #define IDC_AI_LOG                      1193
 #define IDC_AI_SRC                      1194
 #define IDC_AI_DST                      1195
+#define IDC_SCRIPT2                     1196
+#define IDC_SCRIPT2_1                   1197
+#define IDC_SCRIPT2_2                   1198
+#define IDC_SCRIPT2_3                   1199
+#define IDC_SCRIPT2_4                   1200
+#define IDC_SCRIPT2_5                   1201
+#define IDC_SCRIPT2_6                   1202
+#define IDC_SCRIPT2_7                   1203
+#define IDC_SCRIPT2_8                   1204
+#define IDC_SCRIPT2_9                   1205
+#define IDC_SCRIPT2_10                  1206
+#define IDC_SCRIPT2_TXT_1               1207
+#define IDC_SCRIPT2_TXT_2               1208
+#define IDC_SCRIPT2_TXT_3               1209
+#define IDC_SCRIPT2_TXT_4               1210
+#define IDC_SCRIPT2_TXT_5               1211
+#define IDC_SCRIPT2_TXT_6               1212
+#define IDC_SCRIPT2_TXT_7               1213
+#define IDC_SCRIPT2_TXT_8               1214
+#define IDC_SCRIPT2_TXT_9               1215
+#define IDC_SCRIPT2_TXT_10              1216
 #define ID_ACCEL_DLGDEVICE              40001
 #define ID_ACCEL_MENUBAR                40002
 #define ID_ACCEL_DLGBRUSH               40003
@@ -272,7 +294,7 @@
 #define ID_ACCEL_NEW                    40013
 #define ID_ACCEL_HELP                   40014
 #define ID_ACCEL_MARKERS                40015
-
+#define ID_HEADER_SCRIPT2				40016
 
 // Next default values for new objects
 // 

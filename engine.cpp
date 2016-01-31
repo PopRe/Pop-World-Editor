@@ -15,7 +15,7 @@ http://alacn.dnsalias.org:8080/
 #include "3ds.h"
 #include "dialogs.h"
 
-
+std::vector<THINGSAVE> Objects;
 
 
 LPDIRECTDRAW7			lpDD			= 0;
@@ -73,10 +73,10 @@ POINT					ptCursor,
 						ptCaptured;
 MOUSEBUTTON				MouseButton				= MouseButtonLeft;
 WORD					wEngineGround[GROUND_X_SIZE * GROUND_Z_SIZE];
-LEVELHEADER				LevelHeader;
+LEVELDATv3				*leveldat;
 MARKER					Markers[256];
 int						MarkerSelected = -1;
-LEVELVERSION			LevelVersion = { 0x0B, "ALACN Populous World Editor", __DATE__ ", " __TIME__, 0 };
+LEVELVERSION			LevelVersion = { 0x0B, "ALACN Populous World Editor For Levelv3", __DATE__ ", " __TIME__, 0 };
 GROUNDHEIGHT			GroundHeight[VIEW_RANGE_2][VIEW_RANGE_2];
 float					fEnginePosX				= 0,
 						fEnginePosY				= 5.5f,
@@ -504,6 +504,9 @@ long EnginePrepare()
 	dwScreenWidthN = GetSystemMetrics(SM_CXSCREEN);
 	dwScreenHeightN = GetSystemMetrics(SM_CYSCREEN);
 
+	leveldat = (LEVELDATv3*)malloc(sizeof(LEVELDATv3));
+	memset(leveldat, 0, sizeof(LEVELDATv3));
+
 	memset(&mtrlNormal, 0, sizeof(mtrlNormal));
 	mtrlNormal.diffuse.r  =
 	mtrlNormal.diffuse.g  =
@@ -890,6 +893,10 @@ long EngineDestroy()
 			sprintf(str, SZ_ENGINE_RELEASE_REF, SZ_ENGINE_RELEASE_REF_DD, rs);
 			LogWrite(str);
 		}
+	}
+
+	if (leveldat) {
+		free(leveldat);
 	}
 
 	LogWrite(SZ_ENGINE_DESTROY);
@@ -2430,7 +2437,7 @@ skip:;
 
 				Markers[MarkerSelected].x = (float)bx + 0.5f;
 				Markers[MarkerSelected].z = (float)bz + 0.5f;
-				LevelHeader.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
+				leveldat->Header.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
 				Markers[MarkerSelected].ex = cx;
 				Markers[MarkerSelected].ez = cz;
 				Markers[MarkerSelected].ey = cy;
@@ -2578,29 +2585,49 @@ long EngineLoadLevel(char *filename)
 	HANDLE h = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if(h == INVALID_HANDLE_VALUE)
 	{
-		/*
-		sprintf(str, SZ_ERR_CREATEFILE, filename);
-		LogWrite(str);
-		*/
 		return -1;
 	}
 
-	LEVELDAT *leveldat;
-	leveldat = (LEVELDAT*)malloc(sizeof(LEVELDAT));
-	memset(leveldat, 0, sizeof(LEVELDAT));
+	memset(leveldat, 0, sizeof(LEVELDATv3));
+
+	Objects.clear();
 
 	dwRW = 0;
-	ReadFile(h, leveldat, sizeof(LEVELDAT), &dwRW, 0);
-	if(dwRW != sizeof(LEVELDAT))
+	ReadFile(h, leveldat, sizeof(LEVELDATv3), &dwRW, 0);
+	if(dwRW != sizeof(LEVELDATv3))
 	{
-		free(leveldat);
 		CloseHandle(h);
-
 		sprintf(str, SZ_ERR_READERROR, filename);
 		LogWrite(str);
-
 		EngineNewMap();
 		return -1;
+	}
+
+	const size_t MAGIC_SIZE = 5;
+	const char MAGICDEF[MAGIC_SIZE] = { 'L','E','V','L','3' };
+	for (int i = 0; i < MAGIC_SIZE; i++) {
+		if (leveldat->MAGIC[i] != MAGICDEF[i]) {
+			CloseHandle(h);
+			sprintf(str, SZ_ERR_READERROR, filename);
+			LogWrite(str);
+			EngineNewMap();
+			return -1; // MAGIC IS WRONG! 
+		}
+	}
+
+	for (int i = 0; i < leveldat->Header.MaxNumObjects; i++) {
+		THINGSAVE t;
+		dwRW = 0;
+		ReadFile(h, &t, sizeof(THINGSAVE), &dwRW, 0);
+		if (dwRW != sizeof(THINGSAVE))
+		{
+			CloseHandle(h);
+			sprintf(str, SZ_ERR_READERROR, filename);
+			LogWrite(str);
+			EngineNewMap();
+			return -1;
+		}
+		Objects.push_back(t);
 	}
 
 	memcpy(wEngineGround, leveldat->GroundHeight, sizeof(wEngineGround));
@@ -2609,13 +2636,13 @@ long EngineLoadLevel(char *filename)
 	THING *thing;
 	UWORD idx = 1;
 
-	for(int a = 0; a < MAX_THINGS; a++)
+	for(int a = 0; a < Objects.size(); a++)
 	{
-		if(leveldat->Things[a].Model != 0)
+		if(Objects[a].Model != 0)
 		{
 			thing = new THING;
 			memset(thing, 0, sizeof(THING));
-			memcpy(&thing->Thing, &leveldat->Things[a], sizeof(THINGSAVE));
+			memcpy(&thing->Thing, &Objects[a], sizeof(THINGSAVE));
 			thing->x = (float)((thing->Thing.PosX >> 8) / 2) + 0.5f;
 			thing->z = (float)((thing->Thing.PosZ >> 8) / 2) + 0.5f;
 			thing->Idx = idx;
@@ -2638,57 +2665,13 @@ long EngineLoadLevel(char *filename)
 	}
 
 	DlgObjectIdxToLink();
-
-	free(leveldat);
-
-	//
-
-	CloseHandle(h);
-
-	// -=-=- .hdr -=-=-
-
-	char *fname;
-
-	fname = (char*)malloc(lstrlen(filename) + 1);
-	strcpy(fname, filename);
-
-	char *ext = PathFindExtension(fname);
-	if(lstrcmpi(LEVEL_PREFIX, ext) != 0) goto _skip;
-	strcpy(ext, HEADER_PREFIX);
-
-	h = CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	if(h == INVALID_HANDLE_VALUE)
-	{
-		sprintf(str, SZ_ERR_CREATEFILE, fname);
-		LogWrite(str);
-		goto _skip;
-	}
-
-	dwRW = 0;
-	ReadFile(h, &LevelHeader, sizeof(LevelHeader), &dwRW, 0);
-	if(dwRW != sizeof(LevelHeader))
-	{
-		CloseHandle(h);
-
-		sprintf(str, SZ_ERR_READERROR, fname);
-		LogWrite(str);
-		free(fname);
-
-		EngineNewMap();
-		return -1;
-	}
-
 	CloseHandle(h);
 
 	for(int a = 0; a < 256; a++)
 	{
-		Markers[a].x = (float)((LevelHeader.Markers[a] & 0xFF) / 2) + 0.5f;
-		Markers[a].z = (float)((LevelHeader.Markers[a] >> 8) / 2) + 0.5f;
+		Markers[a].x = (float)((leveldat->Header.Markers[a] & 0xFF) / 2) + 0.5f;
+		Markers[a].z = (float)((leveldat->Header.Markers[a] >> 8) / 2) + 0.5f;
 	}
-
-_skip:
-	free(fname);
-
 	// -=-=-
 
 	EngineSetTreeType();
@@ -2720,33 +2703,31 @@ long EngineSaveLevel(char *filename)
 	}
 
 	// idxs
-
 	DlgObjectLinkToIdx();
 
-	//
-
-	LEVELDAT *leveldat;
-	leveldat = (LEVELDAT*)malloc(sizeof(LEVELDAT));
-	memset(leveldat, 0, sizeof(LEVELDAT));
-
 	memcpy(leveldat->GroundHeight, wEngineGround, sizeof(wEngineGround));
-
-	THINGSAVE *ts = leveldat->Things;
+	Objects.clear();
+	THINGSAVE ts;
 
 	THING *t = Things;
 	if(t) do
 	{
-		memcpy(ts++, &t->Thing, sizeof(THINGSAVE));
+		memcpy(&ts, &t->Thing, sizeof(THINGSAVE));
+		Objects.push_back(ts);
 		t = t->Next;
 	}
 	while(t != Things);
 
+	// Level 2 Spec
+	leveldat->Header.MaxNumObjects = Objects.size();
+	leveldat->Header.MaxNumPlayers = 4;// Players.
+	leveldat->Header.MaxAltPoints  = 128 * 128;
+	leveldat->Header.Version	   = 1;
+
 	dwRW = 0;
-	WriteFile(h, leveldat, sizeof(LEVELDAT), &dwRW, 0);
+	WriteFile(h, leveldat, sizeof(LEVELDATv3), &dwRW, 0);
 
-	free(leveldat);
-
-	if(dwRW != sizeof(LEVELDAT))
+	if(dwRW != sizeof(LEVELDATv3))
 	{
 		CloseHandle(h);
 
@@ -2756,81 +2737,21 @@ long EngineSaveLevel(char *filename)
 		return -1;
 	}
 
-	//
+	for (int i = 0; i < Objects.size(); i++) {
+		dwRW = 0;
+		WriteFile(h, &Objects[i], sizeof(THINGSAVE), &dwRW, 0);
+		if (dwRW != sizeof(THINGSAVE))
+		{
+			CloseHandle(h);
 
-	CloseHandle(h);
+			sprintf(str, SZ_ERR_WRITEERROR, filename);
+			LogWrite(str);
 
-	//
-
-	char *fname;
-	fname = (char*)malloc(lstrlen(filename) + 1);
-	strcpy(fname, filename);
-
-	char *ext = PathFindExtension(fname);
-	if(lstrcmpi(LEVEL_PREFIX, ext) != 0) goto _skip;
-
-	// -=-=- .hdr -=-=-
-
-	strcpy(ext, HEADER_PREFIX);
-
-	h = CreateFile(fname, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-	if(h == INVALID_HANDLE_VALUE)
-	{
-		sprintf(str, SZ_ERR_CREATEFILE, fname);
-		LogWrite(str);
-		free(fname);
-
-		return -1;
-	}
-
-	dwRW = 0;
-	WriteFile(h, &LevelHeader, sizeof(LevelHeader), &dwRW, 0);
-	if(dwRW != sizeof(LevelHeader))
-	{
-		CloseHandle(h);
-
-		sprintf(str, SZ_ERR_WRITEERROR, fname);
-		LogWrite(str);
-		free(fname);
-
-		return -1;
+			return -1;
+		}
 	}
 
 	CloseHandle(h);
-
-	// -=-=- .ver -=-=-
-
-	strcpy(ext, VERSION_PREFIX);
-
-	h = CreateFile(fname, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-	if(h == INVALID_HANDLE_VALUE)
-	{
-		sprintf(str, SZ_ERR_CREATEFILE, fname);
-		LogWrite(str);
-		free(fname);
-
-		return -1;
-	}
-
-	dwRW = 0;
-	WriteFile(h, &LevelVersion, sizeof(LevelVersion), &dwRW, 0);
-	if(dwRW != sizeof(LevelVersion))
-	{
-		CloseHandle(h);
-
-		sprintf(str, SZ_ERR_WRITEERROR, fname);
-		LogWrite(str);
-		free(fname);
-
-		return -1;
-	}
-
-	CloseHandle(h);
-
-_skip:
-	free(fname);
-
-	//
 
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
@@ -3824,7 +3745,7 @@ long EngineDrawObj3D(OBJ3D *obj, float x, float y, float z, DWORD angle)
 
 void EngineSetTreeType()
 {
-	switch(LevelHeader.ObjectsBankNum)
+	switch(leveldat->Header.ObjectsBankNum)
 	{
 	case 3:
 		objTree1 = objTree04;
@@ -3856,8 +3777,8 @@ void EngineSetTreeType()
 
 void EngineNewMap()
 {
-	memset(&LevelHeader, 0, sizeof(LevelHeader));
 	memset(&Markers, 0, sizeof(Markers));
+	memset(leveldat, 0, sizeof(LEVELDATv3));
 
 	THING *thing;
 

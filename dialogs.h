@@ -11,8 +11,8 @@ http://alacn.dnsalias.org:8080/
 #define POPEDT_MENUBAR_NAME							"Menu"
 
 #define POPEDT_MENUBAR								"PopEdtMenuBar"
-#define POPEDT_MENUBAR_WIDTH						120
-#define POPEDT_MENUBAR_HEIGHT						50
+#define POPEDT_MENUBAR_WIDTH						120+9
+#define POPEDT_MENUBAR_HEIGHT						50+13
 
 
 #define SZ_MENU_FILE								"File"
@@ -482,6 +482,12 @@ void DlgAlliesUpdate(HWND hWnd);
 void DlgSpellsBuildingsToggle();
 int __stdcall DlgSpellsBuildingsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void DlgSpellsBuildingsUpdate(HWND hWnd);
+
+// Script2 dialog
+void DlgScript2();
+int __stdcall DlgScript2Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void DlgScript2Update(HWND hWnd);
+
 
 // spells not charging dialog
 void DlgSpellsNotChargingToggle();
