@@ -6,7 +6,7 @@ http://alacn.dnsalias.org:8080/
 
 */
 #pragma once
-#define MAX_THINGS							8000
+#define MAX_THINGS							66535
 #define MAX_THINGS_LOAD						100
 #define	MAX_MANA_VALUE						1000000
 
