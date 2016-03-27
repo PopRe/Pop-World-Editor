@@ -3805,6 +3805,10 @@ void EngineNewMap()
 
 	szLevel[0] = 0;
 	DlgInfoUpdate(hDlgInfo);
+
+    const size_t MAGIC_SIZE = 5;
+    const char MAGICDEF[MAGIC_SIZE] = { 'L','E','V','L','3' };
+    memcpy(&leveldat->MAGIC, MAGICDEF, MAGIC_SIZE);
 }
 
 

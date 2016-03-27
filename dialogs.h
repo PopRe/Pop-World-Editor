@@ -24,7 +24,7 @@ http://alacn.dnsalias.org:8080/
 #define SZ_CONFIRM_NEW_LEVEL						"Current Map will be lost!\ndo you want continue?"
 
 #define SZ_OPENLEVEL_TITLE							"Open Level"
-#define SZ_OPENLEVEL_FILTER							"Populous Levels (levl2*.dat)\0levl2*.dat\0Dat Files (*.dat)\0*.dat\0All Files (*.*)\0*.*\0\0"
+#define SZ_OPENLEVEL_FILTER							"Populous Levels Dat Files (*.dat)\0*.dat\0All Files (*.*)\0*.*\0\0"
 #define SZ_OPENLEVEL_FAILED							"Open Level Failed"
 #define SZ_SAVELEVEL_TITLE							"Save Level"
 #define SZ_SAVELEVEL_DEFEXT							".dat"
