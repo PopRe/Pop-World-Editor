@@ -3471,8 +3471,18 @@ void DlgObjectNewObj()
 	else
 	{
 		memset(t, 0, sizeof(THING));
-		t->Thing.Type = T_PERSON;
-		t->Thing.Model = M_PERSON_BRAVE;
+
+		if ((ThingSelected != nullptr))
+		{
+			t->Thing.Owner = ThingSelected->Thing.Owner;
+			t->Thing.Type = ThingSelected->Thing.Type;
+			t->Thing.Model = ThingSelected->Thing.Model;
+		}
+		else
+		{
+			t->Thing.Type = T_PERSON;
+			t->Thing.Model = M_PERSON_BRAVE;
+		}
 
 		t->x = (float)(int)fEnginePosX + 0.5f;
 		t->z = (float)(int)fEnginePosZ + 0.5f;
