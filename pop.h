@@ -728,6 +728,7 @@ http://alacn.dnsalias.org:8080/
 //#define LEVEL_FLAGS_FORCE640X480		(1<<2)
 //#define LEVEL_FLAGS_LEVEL_EDIT		(1<<3)
 #define LEVEL_FLAGS_NO_GUEST			(1<<4)
+#define LEVEL_NO_REINCARNATE_TIME		(1<<5)
 
 
 // -=-=- angles -=-=-

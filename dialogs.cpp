@@ -6083,6 +6083,16 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
+		case IDC_HEADER_NO_REINCARNATE_TIME:
+			if (HIWORD(wParam) == BN_CLICKED)
+			{
+				if (IsDlgButtonChecked(hWnd, IDC_HEADER_NO_REINCARNATE_TIME) == BST_CHECKED)
+					leveldat->Header.LevelFlags |= LEVEL_NO_REINCARNATE_TIME;
+				else
+					leveldat->Header.LevelFlags &= ~LEVEL_NO_REINCARNATE_TIME;
+			}
+			break;
+
 		case IDC_HEADER_CP_RED:
 			switch(HIWORD(wParam))
 			{
@@ -6194,6 +6204,11 @@ void DlgHeaderUpdate(HWND hWnd)
 		CheckDlgButton(hWnd, IDC_HEADER_NO_GUEST, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_HEADER_NO_GUEST, BST_UNCHECKED);
+
+	if (leveldat->Header.LevelFlags & LEVEL_NO_REINCARNATE_TIME)
+		CheckDlgButton(hWnd, IDC_HEADER_NO_REINCARNATE_TIME, BST_CHECKED);
+	else
+		CheckDlgButton(hWnd, IDC_HEADER_NO_REINCARNATE_TIME, BST_UNCHECKED);
 }
 
 
