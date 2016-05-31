@@ -75,6 +75,7 @@ http://alacn.dnsalias.org:8080/
 #define SZ_ERR_CREATEFILE							"CreateFile Failed: %s"
 #define SZ_ERR_READERROR							"Read Error at: %s"
 #define SZ_ERR_WRITEERROR							"Write Error at: %s"
+#define SZ_ERR_MAGIC_MISMATCH						"LEVEL3 Keyword not found, reverting to Level2 format: %s"
 
 #define GROUND_X_SIZE					128
 #define GROUND_Z_SIZE					128
@@ -303,6 +304,8 @@ long EngineDrawObjects();
 long EngineDrawMiniMap();
 long EngineLoadLevel(char *filename);
 long EngineSaveLevel(char *filename);
+long EngineLoadLevelV3(char *filename);
+long EngineSaveLevelV3(char *filename);
 long EngineUpdateView();
 WORD EngineGetGroundHeight(int x, int z);
 void EngineSetGroundHeight(int x, int z, WORD h);

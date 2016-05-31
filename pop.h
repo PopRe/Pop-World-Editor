@@ -7,6 +7,7 @@ http://alacn.dnsalias.org:8080/
 */
 #pragma once
 #define MAX_THINGS							66535
+#define MAX_V2_THINGS						2000
 #define MAX_THINGS_LOAD						100
 #define	MAX_MANA_VALUE						1000000
 
@@ -795,9 +796,7 @@ struct PLAYERTHINGS
 	UBYTE						Flags;
 };
 
-#define	MAX_LENGTH_SAVE_NAMEv2				(32)
-#define	MAX_NUM_SCRIPT2						10
-struct LEVELHEADER
+struct LEVELHEADERv2
 {
 	PLAYERTHINGS				DefaultThings;
 	CHAR						Name[32];
@@ -811,6 +810,13 @@ struct LEVELHEADER
 	UWORD						Markers[256];
 	UWORD						StartPos;
 	UWORD						StartAngle;
+};
+
+#define	MAX_LENGTH_SAVE_NAMEv2				(32)
+#define	MAX_NUM_SCRIPT2						10
+struct LEVELHEADERv3
+{
+	LEVELHEADERv2				v2;
 	UBYTE						Version;								// How many objects are in the level
 	ULONG						MaxAltPoints;							// How many points are in the level
 	ULONG						MaxNumObjects;							// How many objects are in the level
@@ -909,14 +915,14 @@ struct THINGSAVE
 struct LEVELDATv3
 {
 	char						MAGIC[5];
-	struct LEVELHEADER			Header;
+	struct LEVELHEADERv3		Header;
 	WORD						GroundHeight[128 * 128];
 	BYTE						NoAccessSquares[128 * 128];
 	PLAYERSAVEINFO				psi[4];
 	SUNLIGHTSAVEINFO			ssi;
 };
 
-struct LEVELDAT
+struct LEVELDATv2
 {
 	WORD						GroundHeight[128 * 128];
 	BYTE						LandBlocks[128 * 128];
@@ -924,7 +930,7 @@ struct LEVELDAT
 	BYTE						NoAccessSquares[128 * 128];
 	PLAYERSAVEINFO				psi[4];
 	SUNLIGHTSAVEINFO			ssi;
-	THINGSAVE					Things[MAX_THINGS];
+	THINGSAVE					Things[MAX_V2_THINGS];
 	ACCESSSAVEINFO asi[50];
 };
 

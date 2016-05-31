@@ -2437,7 +2437,7 @@ skip:;
 
 				Markers[MarkerSelected].x = (float)bx + 0.5f;
 				Markers[MarkerSelected].z = (float)bz + 0.5f;
-				leveldat->Header.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
+				leveldat->Header.v2.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
 				Markers[MarkerSelected].ex = cx;
 				Markers[MarkerSelected].ez = cz;
 				Markers[MarkerSelected].ey = cy;
@@ -2576,7 +2576,7 @@ long EngineDrawMiniMap()
 }
 
 
-long EngineLoadLevel(char *filename)
+long EngineLoadLevelV3(char *filename)
 {
 	EngineNewMap();
 
@@ -2608,10 +2608,11 @@ long EngineLoadLevel(char *filename)
 	for (int i = 0; i < MAGIC_SIZE; i++) {
 		if (leveldat->MAGIC[i] != MAGICDEF[i]) {
 			CloseHandle(h);
-			sprintf(str, SZ_ERR_READERROR, filename);
+			sprintf(str, SZ_ERR_MAGIC_MISMATCH, filename);
 			LogWrite(str);
-			EngineNewMap();
-			return -1; // MAGIC IS WRONG! 
+
+			// MAGIC IS WRONG! Lets try V2 next
+			return EngineLoadLevel(filename);
 		}
 	}
 
@@ -2669,8 +2670,8 @@ long EngineLoadLevel(char *filename)
 
 	for(int a = 0; a < 256; a++)
 	{
-		Markers[a].x = (float)((leveldat->Header.Markers[a] & 0xFF) / 2) + 0.5f;
-		Markers[a].z = (float)((leveldat->Header.Markers[a] >> 8) / 2) + 0.5f;
+		Markers[a].x = (float)((leveldat->Header.v2.Markers[a] & 0xFF) / 2) + 0.5f;
+		Markers[a].z = (float)((leveldat->Header.v2.Markers[a] >> 8) / 2) + 0.5f;
 	}
 	// -=-=-
 
@@ -2690,7 +2691,145 @@ long EngineLoadLevel(char *filename)
 }
 
 
-long EngineSaveLevel(char *filename)
+long EngineLoadLevel(char *filename)
+{
+	EngineNewMap();
+
+	// -=-=- .dat -=-=-
+
+	HANDLE h = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		//
+		//sprintf(str, SZ_ERR_CREATEFILE, filename);
+		//LogWrite(str);
+		//
+		return -1;
+	}
+
+	LEVELDATv2 *level2dat;
+	level2dat = (LEVELDATv2*)malloc(sizeof(LEVELDATv2));
+	memset(level2dat, 0, sizeof(LEVELDATv2));
+
+	dwRW = 0;
+	ReadFile(h, level2dat, sizeof(LEVELDATv2), &dwRW, 0);
+	if(dwRW != sizeof(LEVELDATv2))
+	{
+		free(level2dat);
+		CloseHandle(h);
+
+		sprintf(str, SZ_ERR_READERROR, filename);
+		LogWrite(str);
+
+		EngineNewMap();
+		return -1;
+	}
+
+	memcpy(wEngineGround, level2dat->GroundHeight, sizeof(wEngineGround));
+
+	DWORD dw = 0;
+	THING *thing;
+	UWORD idx = 1;
+
+	for(int a = 0; a < MAX_V2_THINGS; a++)
+	{
+		if(level2dat->Things[a].Model != 0)
+		{
+			thing = new THING;
+			memset(thing, 0, sizeof(THING));
+			memcpy(&thing->Thing, &level2dat->Things[a], sizeof(THINGSAVE));
+			thing->x = (float)((thing->Thing.PosX >> 8) / 2) + 0.5f;
+			thing->z = (float)((thing->Thing.PosZ >> 8) / 2) + 0.5f;
+			thing->Idx = idx;
+
+			if(thing->Thing.Type == T_EFFECT && thing->Thing.Model == M_EFFECT_LAND_BRIDGE)
+			{
+				thing->LandBridge.x = (float)(((thing->Thing.Bluff[0] & 0xFFFF) >> 8) / 2) + 0.5f;
+				thing->LandBridge.z = (float)(((thing->Thing.Bluff[1] & 0xFFFF) >> 8) / 2) + 0.5f;
+			}
+			else if(thing->Thing.Type == T_PERSON && thing->Thing.Model == M_PERSON_SHAMAN && thing->Thing.Owner == OWNER_BLUE)
+			{
+				fEnginePosX = thing->x;
+				fEnginePosZ = thing->z;
+			}
+
+			LINK(Things, thing);
+			ObjectsCount++;
+		}
+		idx++;
+	}
+
+	DlgObjectIdxToLink();
+
+	free(level2dat);
+
+	//
+
+	CloseHandle(h);
+
+	// -=-=- .hdr -=-=-
+
+	char *fname;
+
+	fname = (char*)malloc(lstrlen(filename) + 1);
+	strcpy(fname, filename);
+
+	char *ext = PathFindExtension(fname);
+	if(lstrcmpi(LEVEL_PREFIX, ext) != 0) goto _skip;
+	strcpy(ext, HEADER_PREFIX);
+
+	h = CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		sprintf(str, SZ_ERR_CREATEFILE, fname);
+		LogWrite(str);
+		goto _skip;
+	}
+
+	dwRW = 0;
+	ReadFile(h, &leveldat->Header.v2, sizeof(leveldat->Header.v2), &dwRW, 0);
+	if(dwRW != sizeof(leveldat->Header.v2))
+	{
+		CloseHandle(h);
+
+		sprintf(str, SZ_ERR_READERROR, fname);
+		LogWrite(str);
+		free(fname);
+
+		EngineNewMap();
+		return -1;
+	}
+
+	CloseHandle(h);
+
+	for(int a = 0; a < 256; a++)
+	{
+		Markers[a].x = (float)((leveldat->Header.v2.Markers[a] & 0xFF) / 2) + 0.5f;
+		Markers[a].z = (float)((leveldat->Header.v2.Markers[a] >> 8) / 2) + 0.5f;
+	}
+
+_skip:
+	free(fname);
+
+	// -=-=-
+
+	EngineSetTreeType();
+
+	DlgObjectUpdateInfo(hDlgObject);
+	UpdateHeaderDialogs();
+	DlgMarkersUpdate(hDlgMarkers);
+	
+	EngineUpdateView();
+	EngineUpdateMiniMap();
+
+	strcpy(szLevel, filename);
+	DlgInfoUpdate(hDlgInfo);
+
+	return S_OK;
+}
+
+
+long EngineSaveLevelV3(char *filename)
 {
 	// -=-=- .dat -=-=-
 
@@ -2752,6 +2891,145 @@ long EngineSaveLevel(char *filename)
 	}
 
 	CloseHandle(h);
+
+	strcpy(szLevel, filename);
+	DlgInfoUpdate(hDlgInfo);
+
+	return S_OK;
+}
+
+
+long EngineSaveLevel(char *filename)
+{
+	// -=-=- .dat -=-=-
+
+	HANDLE h = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		sprintf(str, SZ_ERR_CREATEFILE, filename);
+		LogWrite(str);
+		return -1;
+	}
+
+	// idxs
+
+	DlgObjectLinkToIdx();
+
+	//
+
+	LEVELDATv2 *level2dat;
+	level2dat = (LEVELDATv2*)malloc(sizeof(LEVELDATv2));
+	memset(level2dat, 0, sizeof(LEVELDATv2));
+
+	memcpy(level2dat->GroundHeight, wEngineGround, sizeof(wEngineGround));
+
+	THINGSAVE *ts = level2dat->Things;
+
+	THING *t = Things;
+	int savedThings = 0;
+	if(t) do
+	{
+		memcpy(ts++, &t->Thing, sizeof(THINGSAVE));
+		savedThings++;
+		t = t->Next;
+
+		//if we reached the max things supported by v2, bail out
+		if (savedThings == MAX_V2_THINGS) {
+			break;
+		}
+	}
+	while(t != Things);
+
+	dwRW = 0;
+	WriteFile(h, level2dat, sizeof(LEVELDATv2), &dwRW, 0);
+
+	free(level2dat);
+
+	if(dwRW != sizeof(LEVELDATv2))
+	{
+		CloseHandle(h);
+
+		sprintf(str, SZ_ERR_WRITEERROR, filename);
+		LogWrite(str);
+
+		return -1;
+	}
+
+	//
+
+	CloseHandle(h);
+
+	//
+
+	char *fname;
+	fname = (char*)malloc(lstrlen(filename) + 1);
+	strcpy(fname, filename);
+
+	char *ext = PathFindExtension(fname);
+	if(lstrcmpi(LEVEL_PREFIX, ext) != 0) goto _skip;
+
+	// -=-=- .hdr -=-=-
+
+	strcpy(ext, HEADER_PREFIX);
+
+	h = CreateFile(fname, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		sprintf(str, SZ_ERR_CREATEFILE, fname);
+		LogWrite(str);
+		free(fname);
+
+		return -1;
+	}
+
+	dwRW = 0;
+	WriteFile(h, &leveldat->Header.v2, sizeof(leveldat->Header.v2), &dwRW, 0);
+	if(dwRW != sizeof(leveldat->Header.v2))
+	{
+		CloseHandle(h);
+
+		sprintf(str, SZ_ERR_WRITEERROR, fname);
+		LogWrite(str);
+		free(fname);
+
+		return -1;
+	}
+
+	CloseHandle(h);
+
+	// -=-=- .ver -=-=-
+
+	strcpy(ext, VERSION_PREFIX);
+
+	h = CreateFile(fname, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		sprintf(str, SZ_ERR_CREATEFILE, fname);
+		LogWrite(str);
+		free(fname);
+
+		return -1;
+	}
+
+	dwRW = 0;
+	WriteFile(h, &LevelVersion, sizeof(LevelVersion), &dwRW, 0);
+	if(dwRW != sizeof(LevelVersion))
+	{
+		CloseHandle(h);
+
+		sprintf(str, SZ_ERR_WRITEERROR, fname);
+		LogWrite(str);
+		free(fname);
+
+		return -1;
+	}
+
+	CloseHandle(h);
+
+_skip:
+	free(fname);
+
+	//
 
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
@@ -3745,7 +4023,7 @@ long EngineDrawObj3D(OBJ3D *obj, float x, float y, float z, DWORD angle)
 
 void EngineSetTreeType()
 {
-	switch(leveldat->Header.ObjectsBankNum)
+	switch(leveldat->Header.v2.ObjectsBankNum)
 	{
 	case 3:
 		objTree1 = objTree04;
@@ -3816,7 +4094,7 @@ void EngineLoadConfig()
 {
 	// tmp map
 
-	EngineLoadLevel(SZ_ENGINE_TMP_MAP);
+	EngineLoadLevelV3(SZ_ENGINE_TMP_MAP);
 	szLevel[0] = 0;
 
 	// config
