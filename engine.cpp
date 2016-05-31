@@ -574,6 +574,10 @@ long EngineFinish()
 
 	while(Textures) EngineDestroyTexture(Textures);
 
+	if (leveldat) {
+		free(leveldat);
+	}
+
 	while(ScreenInfo)
 	{
 		SCREEN_INFO *si;
@@ -893,10 +897,6 @@ long EngineDestroy()
 			sprintf(str, SZ_ENGINE_RELEASE_REF, SZ_ENGINE_RELEASE_REF_DD, rs);
 			LogWrite(str);
 		}
-	}
-
-	if (leveldat) {
-		free(leveldat);
 	}
 
 	LogWrite(SZ_ENGINE_DESTROY);
