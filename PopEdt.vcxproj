@@ -41,15 +41,15 @@
     <_ProjectFileVersion>14.0.24720.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)build</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)</IntDir>
+    <OutDir>$(SolutionDir)\build\$(Platform)\$(Configuration\)</OutDir>
+    <IntDir>$(SolutionDir)\build\$(Platform)\$(Configuration\intermediate\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)build</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)</IntDir>
+    <OutDir>$(SolutionDir)\build\$(Platform)\$(Configuration\)</OutDir>
+    <IntDir>$(SolutionDir)\build\$(Platform)\$(Configuration\intermediate\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>$(ProjectName)d</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -63,7 +63,7 @@
       <PrecompiledHeaderOutputFile>.\Release/PopEdt.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(TargetDir)</AssemblerListingLocation>
       <ObjectFileName>$(TargetDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(TargetDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat />
@@ -74,7 +74,7 @@
       <OutputFile>$(TargetDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <Midl>
@@ -99,11 +99,11 @@
       <PrecompiledHeaderOutputFile>.\Debug/PopEdt.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(TargetDir)</AssemblerListingLocation>
       <ObjectFileName>$(TargetDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(TargetDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
@@ -111,7 +111,7 @@
       <OutputFile>$(TargetDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <Midl>
