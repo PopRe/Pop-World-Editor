@@ -1255,7 +1255,7 @@ long EngineDrawFrameRate()
 
 long EngineDrawLandscape()
 {
-	if(dwEngineFlags & EF_WIREFRAME_LAND) lpD3DDevice->SetRenderState(D3DRENDERSTATE_FILLMODE, D3DFILL_WIREFRAME);
+	if (dwEngineFlags & EF_WIREFRAME_LAND) lpD3DDevice->SetRenderState(D3DRENDERSTATE_FILLMODE, D3DFILL_WIREFRAME);
 
 	lpD3DDevice->SetTransform(D3DTRANSFORMSTATE_VIEW, &matEngineView);
 	lpD3DDevice->SetTransform(D3DTRANSFORMSTATE_WORLD, &matIdentify);
@@ -1290,37 +1290,47 @@ long EngineDrawLandscape()
 	int x = (int)fEnginePosX - VIEW_RANGE,
 		z = (int)fEnginePosZ - VIEW_RANGE;
 
-	for(int az = 0; az < VIEW_RANGE_2 - 1; az++, z++, x = (int)fEnginePosX - VIEW_RANGE)
-	for(int ax = 0; ax < VIEW_RANGE_2 - 1; ax++, x++)
+	for (int az = 0; az < VIEW_RANGE_2 - 1; az++, z++, x = (int)fEnginePosX - VIEW_RANGE)
+		for (int ax = 0; ax < VIEW_RANGE_2 - 1; ax++, x++)
+		{
+			v[0].x = (float)(x + 1);
+			v[0].z = (float)z;
+			v[0].y = GroundHeight[ax + 1][az].height;
+			v[0].color = GroundHeight[ax + 1][az].color;
+
+			v[1].x = (float)x;
+			v[1].z = (float)z;
+			v[1].y = GroundHeight[ax][az].height;
+			v[1].color = GroundHeight[ax][az].color;
+
+			v[2].x = (float)(x + 1);
+			v[2].z = (float)(z + 1);
+			v[2].y = GroundHeight[ax + 1][az + 1].height;
+			v[2].color = GroundHeight[ax + 1][az + 1].color;
+
+			v[3] = v[2];
+
+			v[4] = v[1];
+
+			v[5].x = (float)x;
+			v[5].z = (float)(z + 1);
+			v[5].y = GroundHeight[ax][az + 1].height;
+			v[5].color = GroundHeight[ax][az + 1].color;
+
+			lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF_COLORVERTEX, v, 6, 0);
+		}
+
+	bool inSphericalView = (fEnginePosY < MAX_SPERICAL_POS_Y);
+	if (inSphericalView)
 	{
-		v[0].x = (float)(x + 1);
-		v[0].z = (float)z;
-		v[0].y = GroundHeight[ax + 1][az].height;
-		v[0].color = GroundHeight[ax + 1][az].color;
-
-		v[1].x = (float)x;
-		v[1].z = (float)z;
-		v[1].y = GroundHeight[ax][az].height;
-		v[1].color = GroundHeight[ax][az].color;
-
-		v[2].x = (float)(x + 1);
-		v[2].z = (float)(z + 1);
-		v[2].y = GroundHeight[ax + 1][az + 1].height;
-		v[2].color = GroundHeight[ax + 1][az + 1].color;
-
-		v[3] = v[2];
-
-		v[4] = v[1];
-
-		v[5].x = (float)x;
-		v[5].z = (float)(z + 1);
-		v[5].y = GroundHeight[ax][az + 1].height;
-		v[5].color = GroundHeight[ax][az + 1].color;
-
-		lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF_COLORVERTEX, v, 6, 0);
+		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, true);
+	}
+	else
+	{
+		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, false);
 	}
 
-	if(dwEngineFlags & EF_GRID_SEE_THROUGH)
+	if((dwEngineFlags & EF_GRID_SEE_THROUGH) && inSphericalView)
 	{
 #if USE_FOG
 		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, false);
@@ -1787,7 +1797,7 @@ _skip:
 		}
 	}
 
-	if(dwEngineFlags & EF_GRID_SEE_THROUGH)
+	if((dwEngineFlags & EF_GRID_SEE_THROUGH) && inSphericalView)
 	{
 #if USE_FOG
 		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, true);
@@ -3077,17 +3087,21 @@ long EngineUpdateView()
 		GroundHeight[ax][az].color = LANDSCAPE_COLORS[w];
 
 #if SPHERICAL_WORLD
-		// optimizations screw up at powf
-		//float f = sqrtf(powf((float)x - fEnginePosX, 2.0f) + powf((float)z - fEnginePosZ, 2.0f));
-		//GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
-		
-		float f, f1, f2;
-		f1 = (float)x - fEnginePosX;
-		f1 = f1 * f1;
-		f2 = (float)z - fEnginePosZ;
-		f2 = f2 * f2;
-		f = sqrtf(f1 + f2);
-		GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
+		if (fEnginePosY <= MAX_SPERICAL_POS_Y)
+		{
+
+			// optimizations screw up at powf
+			//float f = sqrtf(powf((float)x - fEnginePosX, 2.0f) + powf((float)z - fEnginePosZ, 2.0f));
+			//GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
+
+			float f, f1, f2;
+			f1 = (float)x - fEnginePosX;
+			f1 = f1 * f1;
+			f2 = (float)z - fEnginePosZ;
+			f2 = f2 * f2;
+			f = sqrtf(f1 + f2);
+			GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
+		}
 #endif
 	}
 
@@ -3419,6 +3433,24 @@ down_skip:
 	if(bKeys[VK_RIGHT])
 	{
 		fEngineRotY += (float)dwEngineTick * SPEED_ROT_Y;
+		UpdateView = true;
+	}
+
+	if (bKeys[VK_OEM_PLUS])
+	{
+		if (fEngineRotX > MIN_ROT_X  && fEnginePosY < MAX_SPERICAL_POS_Y)
+			fEngineRotX -= (float)dwEngineTick * SPEED_ROT_X;
+		if (fEnginePosY > MIN_POS_Y)
+			fEnginePosY -= (float)dwEngineTick * SPEED_POS_Y_ZOOM;
+		UpdateView = true;
+	}
+
+	if (bKeys[VK_OEM_MINUS])
+	{
+		if (fEngineRotX < MAX_ROT_X)
+			fEngineRotX += (float)dwEngineTick * SPEED_ROT_X;
+		if (fEnginePosY < MAX_POS_Y)
+			fEnginePosY += (float)dwEngineTick * SPEED_POS_Y_ZOOM;
 		UpdateView = true;
 	}
 

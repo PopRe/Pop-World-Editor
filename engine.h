@@ -114,6 +114,13 @@ http://alacn.dnsalias.org:8080/
 #define SPEED_ROT_X						0.0000000007f
 #define SPEED_ROT_Y						0.0000000007f
 #define SPEED_ROT_Z						0.0000000007f
+#define SPEED_POS_Y_ZOOM				0.00000000021f
+
+#define MIN_POS_Y						5.5f
+#define MAX_SPERICAL_POS_Y				20.0f
+#define MAX_POS_Y						30.0f
+#define MIN_ROT_X						35.0f
+#define MAX_ROT_X						85.0f
 
 #define MINIMAP_Z						5.0f
 #define MINIMAP_X_ORIENTATION			1.0f
