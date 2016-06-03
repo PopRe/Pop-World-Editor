@@ -81,15 +81,14 @@ http://alacn.dnsalias.org:8080/
 #define GROUND_Z_SIZE					128
 #define GROUND_BLOCK_HEIGHT				0.005f
 
-#define VIEW_RANGE						25
-#define VIEW_RANGE_2					50
+#define VIEW_RANGE						30
+#define VIEW_RANGE_2					60
 
-#define VIEW_RANGE_CLICK_MIN			15 // VIEW_RANGE -+ 10
-#define VIEW_RANGE_CLICK_MAX			35
-#define VIEW_RANGE_CLICK				10
+#define VIEW_RANGE_CLICK_MIN			10 // VIEW_RANGE -+ 20
+#define VIEW_RANGE_CLICK_MAX			50
+#define VIEW_RANGE_CLICK				20
 
 #define SPHERE_RATIO					0.01f
-#define GROUNDEDIT_RANGE				15
 #define GROUND_HEIGHT_MAX				0x0700
 
 #define MINIMAP_TEXTURE_SIZE			128
