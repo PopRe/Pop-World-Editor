@@ -14,6 +14,7 @@ http://alacn.dnsalias.org:8080/
 #include "log.h"
 #include "3ds.h"
 #include "dialogs.h"
+#include "user_storage.h"
 
 std::vector<THINGSAVE> Objects;
 
@@ -4125,21 +4126,42 @@ void EngineNewMap()
 void EngineLoadConfig()
 {
 	// tmp map
+	char szTempLevelFfilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_TMP_MAP, szTempLevelFfilePath))
+	{
+		strcpy_s(szTempLevelFfilePath, sizeof(char) * (strlen(SZ_ENGINE_TMP_MAP) + 1), SZ_ENGINE_TMP_MAP);
+	}
 
-	EngineLoadLevelV3(SZ_ENGINE_TMP_MAP);
+	EngineLoadLevelV3(szTempLevelFfilePath);
 	szLevel[0] = 0;
 
 	// config
+	char szEngineConfigFilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_CONFIG, szEngineConfigFilePath))
+	{
+		strcpy_s(szEngineConfigFilePath, sizeof(char) * (strlen(SZ_ENGINE_CONFIG) + 1), SZ_ENGINE_CONFIG);
+	}
 
 	HANDLE h;
 
-	h = CreateFile(SZ_ENGINE_CONFIG, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	h = CreateFile(szEngineConfigFilePath, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if(h == INVALID_HANDLE_VALUE)
 	{
 		/*
-		sprintf(str, SZ_ERR_CREATEFILE, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_CREATEFILE, szEngineConfigFilePath);
 		LogWrite(str);
 		*/
+
+		//memcpy(&guidDevice, &guid, sizeof(GUID));
+		//strcpy(szDeviceName, devname);
+
+		// Initialize the engine with safe default parameters.
+		dwScreenWidth = 640;
+		dwScreenHeight = 480;
+		dwScreenDepth = 32;
+		fFullScreen = true;
+		fHwDevice = true;
+
 		return;
 	}
 
@@ -4154,7 +4176,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4169,7 +4191,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4184,7 +4206,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4206,7 +4228,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4218,7 +4240,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4230,7 +4252,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4242,7 +4264,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4254,7 +4276,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4266,7 +4288,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4278,7 +4300,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4304,16 +4326,28 @@ void EngineSaveConfig()
 
 	// tmp map
 
-	EngineSaveLevel(SZ_ENGINE_TMP_MAP);
+	char szTempLevelFfilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_TMP_MAP, szTempLevelFfilePath))
+	{
+		strcpy_s(szTempLevelFfilePath, sizeof(char) * (strlen(SZ_ENGINE_TMP_MAP) + 1), SZ_ENGINE_TMP_MAP);
+	}
+
+	EngineSaveLevel(szTempLevelFfilePath);
 
 	// config
 
+	char szEngineConfigFilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_CONFIG, szEngineConfigFilePath))
+	{
+		strcpy_s(szEngineConfigFilePath, sizeof(char) * (strlen(SZ_ENGINE_CONFIG) + 1), SZ_ENGINE_CONFIG);
+	}
+
 	HANDLE h;
 
-	h = CreateFile(SZ_ENGINE_CONFIG, GENERIC_WRITE | GENERIC_READ, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	h = CreateFile(szEngineConfigFilePath, GENERIC_WRITE | GENERIC_READ, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 	if(h == INVALID_HANDLE_VALUE)
 	{
-		sprintf(str, SZ_ERR_CREATEFILE, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_CREATEFILE, szEngineConfigFilePath);
 		LogWrite(str);
 		return;
 	}
@@ -4326,7 +4360,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4340,7 +4374,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4352,7 +4386,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4366,7 +4400,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4378,7 +4412,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4390,7 +4424,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4402,7 +4436,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4414,7 +4448,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4426,7 +4460,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4438,7 +4472,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;

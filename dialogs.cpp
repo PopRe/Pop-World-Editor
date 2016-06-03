@@ -15,6 +15,7 @@ http://alacn.dnsalias.org:8080/
 #include "dialogs.h"
 #include "log.h"
 #include "script.h"
+#include "user_storage.h"
 
 
 
@@ -116,7 +117,7 @@ void LevelOpen()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szLevel);
 
 	OPENFILENAME ofn;
@@ -169,7 +170,7 @@ void LevelSaveAs()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szLevel);
 
 	OPENFILENAME ofn;
@@ -215,7 +216,7 @@ void ExportHeightMap()
 	char filename[STR_SIZE],
 		 strInitDir[STR_SIZE];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	memset(filename, 0, sizeof(filename));
 
 	OPENFILENAME ofn;
@@ -391,7 +392,7 @@ void Lang2Text()
 	char flang[MAX_PATH], ftext[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(flang, szLang_Lang);
 
 	OPENFILENAME ofn;
@@ -413,7 +414,7 @@ void Lang2Text()
 
     //
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(ftext, szLang_Text);
 
 	//OPENFILENAME ofn;
@@ -525,7 +526,7 @@ void Text2Lang()
 	char flang[MAX_PATH], ftext[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(ftext, szLang_Text);
 
 	OPENFILENAME ofn;
@@ -547,7 +548,7 @@ void Text2Lang()
 
     //
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(flang, szLang_Lang);
 
 	//OPENFILENAME ofn;
@@ -7813,7 +7814,7 @@ bool DlgAIAttribSaveAs()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	memset(filename, 0, sizeof(filename));
 
 	OPENFILENAME ofn;
@@ -7854,7 +7855,7 @@ bool DlgAIAttribOpen()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	memset(filename, 0, sizeof(filename));
 
 	OPENFILENAME ofn;
@@ -8200,7 +8201,7 @@ void DlgAIScriptLog()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szAIScriptLog);
 
 	OPENFILENAME ofn;
@@ -8231,7 +8232,7 @@ void DlgAIScriptSrc()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szAIScriptSrc);
 
 	OPENFILENAME ofn;
@@ -8296,7 +8297,7 @@ void DlgAIScriptDst()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szAIScriptDst);
 
 	OPENFILENAME ofn;

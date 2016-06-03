@@ -39,6 +39,9 @@
     <ClCompile Include="script_decompile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="user_storage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3ds.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="std.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="user_storage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

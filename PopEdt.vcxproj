@@ -135,6 +135,7 @@
     <ClCompile Include="script.cpp" />
     <ClCompile Include="script_compile.cpp" />
     <ClCompile Include="script_decompile.cpp" />
+    <ClCompile Include="user_storage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PopEdt.rc" />
@@ -149,6 +150,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="script.h" />
     <ClInclude Include="std.h" />
+    <ClInclude Include="user_storage.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="cn.ico" />
