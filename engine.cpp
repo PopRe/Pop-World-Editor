@@ -4155,13 +4155,6 @@ void EngineLoadConfig()
 		//memcpy(&guidDevice, &guid, sizeof(GUID));
 		//strcpy(szDeviceName, devname);
 
-		// Initialize the engine with safe default parameters.
-		dwScreenWidth = 640;
-		dwScreenHeight = 480;
-		dwScreenDepth = 32;
-		fFullScreen = true;
-		fHwDevice = true;
-
 		return;
 	}
 

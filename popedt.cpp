@@ -43,7 +43,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, char *szCmdLine,
 
 	dwScreenWidth	= 640;
 	dwScreenHeight	= 480;
-	dwScreenDepth	= 16;
+	dwScreenDepth	= 32;
 	//guidDevice		= IID_IDirect3DHALDevice;
 	//strcpy(szDeviceName, "Direct3D HAL");
 	guidDevice		= IID_IDirect3DTnLHalDevice;
