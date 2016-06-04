@@ -12,7 +12,7 @@ http://alacn.dnsalias.org:8080/
 
 #define POPEDT_MENUBAR								"PopEdtMenuBar"
 #define POPEDT_MENUBAR_WIDTH						120+9
-#define POPEDT_MENUBAR_HEIGHT						50+13
+#define POPEDT_MENUBAR_HEIGHT						40+13
 
 
 #define SZ_MENU_FILE								"File"
