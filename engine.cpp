@@ -1321,6 +1321,7 @@ long EngineDrawLandscape()
 			lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF_COLORVERTEX, v, 6, 0);
 		}
 
+#if USE_FOG
 	bool inSphericalView = (fEnginePosY < MAX_SPERICAL_POS_Y);
 	if (inSphericalView)
 	{
@@ -1330,6 +1331,7 @@ long EngineDrawLandscape()
 	{
 		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, false);
 	}
+#endif
 
 	if((dwEngineFlags & EF_GRID_SEE_THROUGH) && inSphericalView)
 	{
