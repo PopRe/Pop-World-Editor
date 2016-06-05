@@ -96,7 +96,8 @@ D3DLIGHT7				lightLandscape,
 						lightObjects;
 int						GroundEditBrushSize		= 3,
 						GroundEditBrushSpeed	= 4,
-						ObjectsCount			= 0;
+						ObjectsCount			= 0,
+						LevelFormatMode			= LEVEL_FORMAT_MODE_V3;
 
 const int GroundEditBrushSizeList[BRUSH_SIZE_MAX-BRUSH_SIZE_MIN+1] = {
 	30000, 25000, 20000, 15000, 10000, 7000, 5000, 2500, 1000
@@ -2700,6 +2701,7 @@ long EngineLoadLevelV3(char *filename)
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
 
+	LevelFormatMode = LEVEL_FORMAT_MODE_V3;
 	return S_OK;
 }
 
@@ -2838,6 +2840,7 @@ _skip:
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
 
+	LevelFormatMode = LEVEL_FORMAT_MODE_V2;
 	return S_OK;
 }
 
@@ -2908,12 +2911,20 @@ long EngineSaveLevelV3(char *filename)
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
 
+	LevelFormatMode = LEVEL_FORMAT_MODE_V3;
 	return S_OK;
 }
 
 
 long EngineSaveLevel(char *filename)
 {
+	//level2 compatibility check
+	if (ObjectsCount > MAX_V2_THINGS) {
+		if (ModalMsg(SZ_CONFIRM_MAX_L2_OBJECTS, APPNAME, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+			return EngineSaveLevelV3(filename);
+		}
+	}
+
 	// -=-=- .dat -=-=-
 
 	HANDLE h = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
@@ -3047,6 +3058,7 @@ _skip:
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
 
+	LevelFormatMode = LEVEL_FORMAT_MODE_V2;
 	return S_OK;
 }
 
@@ -4327,7 +4339,7 @@ void EngineSaveConfig()
 		strcpy_s(szTempLevelFfilePath, sizeof(char) * (strlen(SZ_ENGINE_TMP_MAP) + 1), SZ_ENGINE_TMP_MAP);
 	}
 
-	EngineSaveLevel(szTempLevelFfilePath);
+	EngineSaveLevelV3(szTempLevelFfilePath);  //the temp file can always be saved in v3 format, it will guarantee no loss
 
 	// config
 

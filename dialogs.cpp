@@ -153,10 +153,10 @@ void LevelSave()
 {
 	if(lstrlen(szLevel) != 0)
 	{
-		if(EngineSaveLevel(szLevel) != S_OK)
+		if((LevelFormatMode == LEVEL_FORMAT_MODE_V3 ? EngineSaveLevelV3(szLevel) : EngineSaveLevel(szLevel)) != S_OK)
 			ModalMsg(SZ_SAVELEVEL_FAILED, APPNAME, MB_ICONEXCLAMATION);
 		else
-			ModalMsg(SZ_SAVELEVEL_DONE_V3, APPNAME, MB_ICONASTERISK);
+			ModalMsg((LevelFormatMode == LEVEL_FORMAT_MODE_V3 ? SZ_SAVELEVEL_DONE_V3 : SZ_SAVELEVEL_DONE_V2), APPNAME, MB_ICONASTERISK);
 	}
 	else
 	{
@@ -183,6 +183,7 @@ void LevelSaveAs()
 	ofn.nMaxFile = sizeof(filename);
 	ofn.lpstrInitialDir = strInitDir;
 	ofn.lpstrFilter = SZ_SAVELEVEL_FILTER;
+	ofn.nFilterIndex = (LevelFormatMode == LEVEL_FORMAT_MODE_V3 ? 1 : 2);  //default the save as format based on the current level format
 	ofn.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
 	LockDialogs(true);

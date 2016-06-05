@@ -142,6 +142,9 @@ http://alacn.dnsalias.org:8080/
 #define EF_HIDE_OBJS_ON_MINIMAP			(1 << 11)
 #define EF_SHOW_MARKERS					(1 << 12)
 
+#define LEVEL_FORMAT_MODE_V2			0
+#define LEVEL_FORMAT_MODE_V3			1
+
 
 
 struct GROUNDHEIGHT
@@ -269,7 +272,8 @@ extern float					fEnginePosX,
 								fEngineRotZ;
 extern int						GroundEditBrushSize,
 								GroundEditBrushSpeed,
-								ObjectsCount;
+								ObjectsCount,
+								LevelFormatMode;
 extern TEXTURE					*Textures;
 extern OBJ3D					*Objs3D;
 extern THING					*Things,

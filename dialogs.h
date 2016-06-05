@@ -22,6 +22,7 @@ http://alacn.dnsalias.org:8080/
 #define SZ_DEVICECONFIRM_TIME						"Auto Restoring in %d seconds..."
 
 #define SZ_CONFIRM_NEW_LEVEL						"Current Map will be lost!\ndo you want continue?"
+#define SZ_CONFIRM_MAX_L2_OBJECTS					"Warning, this map has more objects than supported by Level2\nwould you like to switch to Level3 format instead?\n\nPressing No will result in some objects being lost."
 
 #define SZ_OPENLEVEL_TITLE							"Open Level"
 #define SZ_OPENLEVEL_FILTER							"Populous Levels Dat Files (*.dat)\0*.dat\0All Files (*.*)\0*.*\0\0"
