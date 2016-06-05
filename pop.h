@@ -938,7 +938,7 @@ struct LEVELDATv2
 struct LEVELVERSION
 {
 	SLONG						VersionNum;
-	CHAR						CreatedBy[50];
+	CHAR						CreatedBy[32];
 	CHAR						CreatedOn[28];
 	SLONG						CheckSum;
 };

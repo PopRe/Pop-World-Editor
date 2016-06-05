@@ -77,7 +77,7 @@ WORD					wEngineGround[GROUND_X_SIZE * GROUND_Z_SIZE];
 LEVELDATv3				*leveldat;
 MARKER					Markers[256];
 int						MarkerSelected = -1;
-LEVELVERSION			LevelVersion = { 0x0B, "ALACN Populous World Editor For Levelv3", __DATE__ ", " __TIME__, 0 };
+LEVELVERSION			LevelVersion = { 0x0B, "ALACN Populous World Editor v3", __DATE__ ", " __TIME__, 0 };
 GROUNDHEIGHT			GroundHeight[VIEW_RANGE_2][VIEW_RANGE_2];
 float					fEnginePosX				= 0,
 						fEnginePosY				= 5.5f,
