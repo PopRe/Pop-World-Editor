@@ -1462,6 +1462,20 @@ void GetThingName(THING *t, char *str)
 		default: strcat(str, SZ_UNKNOW);
 		}
 		break;
+    case T_SHOT:
+        switch (t->Thing.Model)
+        {
+        case M_SHOT_STANDARD:                  strcat(str, SZ_SHOT_STANDARD);                  break;
+        case M_SHOT_STANDARD_2:                strcat(str, SZ_SHOT_STANDARD_2);                break;
+        case M_SHOT_STANDARD_3:                strcat(str, SZ_SHOT_STANDARD_3);                break;
+        case M_SHOT_FIREBALL:                  strcat(str, SZ_SHOT_FIREBALL);                  break;
+        case M_SHOT_LIGHTNING:                 strcat(str, SZ_SHOT_LIGHTNING);                 break;
+        case M_SHOT_SUPER_WARRIOR:             strcat(str, SZ_SHOT_SUPER_WARRIOR);             break;
+        case M_SHOT_VOLCANO_FIREBALL_1:        strcat(str, SZ_SHOT_VOLCANO_FIREBALL_1);        break;
+        case M_SHOT_VOLCANO_FIREBALL_2:        strcat(str, SZ_SHOT_VOLCANO_FIREBALL_2);        break;
+        default: strcat(str, SZ_UNKNOW);
+        }
+        break;
 	case T_CREATURE:
 		switch(t->Thing.Model)
 		{
@@ -2377,7 +2391,7 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_RED);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_YELLOW);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_GREEN);
-
+            SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_HOSTBOT);
 			hItem = GetDlgItem(hWnd, IDC_OBJECT_TYPE);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_PERSON);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_BUILDING);
@@ -2388,7 +2402,7 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_VEHICLE);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SPECIAL);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_EFFECT);
-
+            SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT);
 			DlgObjectUpdateInfo(hWnd, false);
 		}
 		return 0;
@@ -2536,6 +2550,9 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case IDX_T_EFFECT:
 					ThingSelected->Thing.Type = T_EFFECT;
 					break;
+                case IDX_T_SHOT:
+                    ThingSelected->Thing.Type = T_SHOT;
+                    break;
 				}
 				memset(&ThingSelected->Thing.Bluff, 0, sizeof(ThingSelected->Thing.Bluff));
 				DlgObjectUpdateInfo(hWnd);
@@ -2761,6 +2778,19 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					memset(&ThingSelected->Thing.Bluff, 0, sizeof(ThingSelected->Thing.Bluff));
 _effect_lb:
 					break;
+                case T_SHOT:
+                    switch (SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
+                    {
+                    case IDX_M_SHOT_STANDARD:                  ThingSelected->Thing.Model = M_SHOT_STANDARD;                  break;
+                    case IDX_M_SHOT_STANDARD_2:                ThingSelected->Thing.Model = M_SHOT_STANDARD_2;                break;
+                    case IDX_M_SHOT_STANDARD_3:                ThingSelected->Thing.Model = M_SHOT_STANDARD_3;                break;
+                    case IDX_M_SHOT_FIREBALL:                  ThingSelected->Thing.Model = M_SHOT_FIREBALL;                  break;
+                    case IDX_M_SHOT_LIGHTNING:                 ThingSelected->Thing.Model = M_SHOT_LIGHTNING;                 break;
+                    case IDX_M_SHOT_SUPER_WARRIOR:             ThingSelected->Thing.Model = M_SHOT_SUPER_WARRIOR;             break;
+                    case IDX_M_SHOT_VOLCANO_FIREBALL_1:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_1;        break;
+                    case IDX_M_SHOT_VOLCANO_FIREBALL_2:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_2;        break;
+                    }
+                    break;
 				}
 				DlgObjectUpdateInfo(hWnd);
 				DlgInfoUpdate(hDlgInfo);
@@ -3075,6 +3105,25 @@ _scenery_skip_rotate:
 					EnableWindow(hItem, true);
 				}
 				break;
+
+            case T_SHOT:
+                SendMessage(hItem, CB_SETCURSEL, IDX_T_SHOT, 0);
+                DlgObjectSetEffectList(hWnd);
+                hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
+                EnableWindow(hItem, true);
+                switch (ThingSelected->Thing.Model)
+                {
+                case IDX_M_SHOT_STANDARD:                  SendMessage(hItem, CB_SETCURSEL, M_SHOT_STANDARD, 0);                  break;
+                case IDX_M_SHOT_STANDARD_2:                SendMessage(hItem, CB_SETCURSEL, M_SHOT_STANDARD_2, 0);                break;
+                case IDX_M_SHOT_STANDARD_3:                SendMessage(hItem, CB_SETCURSEL, M_SHOT_STANDARD_3, 0);                break;
+                case IDX_M_SHOT_FIREBALL:                  SendMessage(hItem, CB_SETCURSEL, M_SHOT_FIREBALL, 0);                  break;
+                case IDX_M_SHOT_LIGHTNING:                 SendMessage(hItem, CB_SETCURSEL, M_SHOT_LIGHTNING, 0);                 break;
+                case IDX_M_SHOT_SUPER_WARRIOR:             SendMessage(hItem, CB_SETCURSEL, M_SHOT_SUPER_WARRIOR, 0);             break;
+                case IDX_M_SHOT_VOLCANO_FIREBALL_1:        SendMessage(hItem, CB_SETCURSEL, M_SHOT_VOLCANO_FIREBALL_1, 0);        break;
+                case IDX_M_SHOT_VOLCANO_FIREBALL_2:        SendMessage(hItem, CB_SETCURSEL, M_SHOT_VOLCANO_FIREBALL_2, 0);        break;
+                }
+                break;
+
 			default: SendMessage(hItem, CB_SETCURSEL, -1, 0);
 			}
 			break;
@@ -3739,6 +3788,12 @@ int __stdcall DlgFilterProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			else
 				ObjectFilterFlags &= ~OFF_EFFECT;
 			break;
+        case IDC_FILTER_SHOT:
+            if (IsDlgButtonChecked(hDlgFilter, IDC_FILTER_SHOT) == BST_CHECKED)
+                ObjectFilterFlags |= OFF_SHOT;
+            else
+                ObjectFilterFlags &= ~OFF_SHOT;
+            break;
 		case IDC_FILTER_UNKNOW:
 			if(IsDlgButtonChecked(hDlgFilter, IDC_FILTER_UNKNOW) == BST_CHECKED)
 				ObjectFilterFlags |= OFF_UNKNOW;
@@ -3823,6 +3878,11 @@ void DlgFilterUpdate(HWND hWnd)
 	else
 		CheckDlgButton(hWnd, IDC_FILTER_EFFECT, BST_UNCHECKED);
 
+    if (ObjectFilterFlags & OFF_SHOT)
+        CheckDlgButton(hWnd, IDC_FILTER_SHOT, BST_CHECKED);
+    else
+        CheckDlgButton(hWnd, IDC_FILTER_SHOT, BST_UNCHECKED);
+
 	if(ObjectFilterFlags & OFF_UNKNOW)
 		CheckDlgButton(hWnd, IDC_FILTER_UNKNOW, BST_CHECKED);
 	else
@@ -3875,6 +3935,8 @@ bool DlgFilterIsInFilter(THING *t)
 	case T_EFFECT:
 		if(ObjectFilterFlags & OFF_EFFECT) return true;
 		break;
+    case T_SHOT:
+        if (ObjectFilterFlags & OFF_SHOT) return true;
 	default:
 		if(ObjectFilterFlags & OFF_UNKNOW) return true;
 	}

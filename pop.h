@@ -253,12 +253,14 @@ http://alacn.dnsalias.org:8080/
 #define OWNER_RED							1
 #define OWNER_YELLOW						2
 #define OWNER_GREEN							3
+#define OWNER_HOSTBOT						4 // Mostly reserved.
 //
 #define SZ_OWNER_NEUTRAL					"Neutral"
 #define SZ_OWNER_BLUE						"Blue"
 #define SZ_OWNER_RED						"Red"
 #define SZ_OWNER_YELLOW						"Yellow"
 #define SZ_OWNER_GREEN						"Green"
+#define SZ_OWNER_HOSTBOT					"Hostbot"
 
 // - types -
 #define T_PERSON							1
@@ -268,7 +270,7 @@ http://alacn.dnsalias.org:8080/
 #define T_SCENERY							5
 #define T_GENERAL							6
 #define T_EFFECT							7
-//#define T_SHOT							8
+#define T_SHOT							    8
 //#define T_SHAPE							9
 //#define T_INTERNAL						10
 #define T_SPELL								11
@@ -281,6 +283,7 @@ http://alacn.dnsalias.org:8080/
 #define SZ_GENERAL							"General"
 #define SZ_EFFECT							"Effect"
 #define SZ_SPELL							"Spell"
+#define SZ_SHOT                             "Shot"
 #define SZ_SPECIAL							"Special" // top/sub level scenery
 
 
@@ -600,7 +603,6 @@ http://alacn.dnsalias.org:8080/
 #define SZ_EFFECT_ARMA_ARENA				"arma arena"
 
 // - shot -
-/*
 #define M_SHOT_STANDARD						1
 #define M_SHOT_STANDARD_2					2
 #define M_SHOT_STANDARD_3					3
@@ -609,7 +611,15 @@ http://alacn.dnsalias.org:8080/
 #define M_SHOT_SUPER_WARRIOR				6
 #define M_SHOT_VOLCANO_FIREBALL_1			7
 #define M_SHOT_VOLCANO_FIREBALL_2			8
-*/
+
+#define SZ_SHOT_STANDARD					"standard"
+#define SZ_SHOT_STANDARD_2					"standard 2"
+#define SZ_SHOT_STANDARD_3					"standard 3"
+#define SZ_SHOT_FIREBALL					"fireball"
+#define SZ_SHOT_LIGHTNING					"lightning"
+#define SZ_SHOT_SUPER_WARRIOR				"super warrior"
+#define SZ_SHOT_VOLCANO_FIREBALL_1			"volcano fireball 1"
+#define SZ_SHOT_VOLCANO_FIREBALL_2			"volcano fireball 2"
 
 // - internal -
 /*

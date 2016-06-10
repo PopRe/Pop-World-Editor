@@ -296,7 +296,7 @@
 #define ID_ACCEL_HELP                   40014
 #define ID_ACCEL_MARKERS                40015
 #define ID_HEADER_SCRIPT2				40016
-
+#define IDC_FILTER_SHOT                 40017
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED

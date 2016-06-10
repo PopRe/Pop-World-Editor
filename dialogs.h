@@ -123,6 +123,7 @@ http://alacn.dnsalias.org:8080/
 #define IDX_T_VEHICLE								6
 #define IDX_T_SPECIAL								7
 #define IDX_T_EFFECT								8
+#define IDX_T_SHOT								    9
 
 #define IDX_M_PERSON_WILD							0
 #define IDX_M_PERSON_BRAVE							1
@@ -322,6 +323,16 @@ http://alacn.dnsalias.org:8080/
 #define IDX_M_VEHICLE_BOAT							0
 #define IDX_M_VEHICLE_AIRSHIP						1
 
+#define IDX_M_SHOT_STANDARD						    1
+#define IDX_M_SHOT_STANDARD_2					    2
+#define IDX_M_SHOT_STANDARD_3					    3
+#define IDX_M_SHOT_FIREBALL						    4
+#define IDX_M_SHOT_LIGHTNING					    5
+#define IDX_M_SHOT_SUPER_WARRIOR				    6
+#define IDX_M_SHOT_VOLCANO_FIREBALL_1			    7
+#define IDX_M_SHOT_VOLCANO_FIREBALL_2			    8
+
+
 
 
 #define SZ_BRUSH_SIZE_TXT							"Size: %d"
@@ -349,6 +360,7 @@ http://alacn.dnsalias.org:8080/
 #define OFF_VEHICLE									0x00000400
 #define OFF_SPELL									0x00000800
 #define OFF_EFFECT									0x00001000
+#define OFF_SHOT									0x00002000
 #define OFF_ALL										0xFFFFFFFF
 
 
