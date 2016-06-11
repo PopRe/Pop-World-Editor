@@ -113,6 +113,7 @@ http://alacn.dnsalias.org:8080/
 #define IDX_OWNER_RED								2
 #define IDX_OWNER_YELLOW							3
 #define IDX_OWNER_GREEN								4
+#define IDX_OWNER_HOSTBOT							5
 
 #define IDX_T_PERSON								0
 #define IDX_T_BUILDING								1
@@ -361,6 +362,7 @@ http://alacn.dnsalias.org:8080/
 #define OFF_SPELL									0x00000800
 #define OFF_EFFECT									0x00001000
 #define OFF_SHOT									0x00002000
+#define OFF_HOSTBOT									0x00008000
 #define OFF_ALL										0xFFFFFFFF
 
 
@@ -442,6 +444,7 @@ void DlgObjectSetSpellList(HWND hWnd);
 void DlgObjectSetEffectList(HWND hWnd);
 void DlgObjectSetCreatureList(HWND hWnd);
 void DlgObjectSetVehicleList(HWND hWnd);
+void DlgObjectSetShotList(HWND hWnd);
 void DlgObjectNextObj();
 void DlgObjectPrevObj();
 void DlgObjectNewObj();

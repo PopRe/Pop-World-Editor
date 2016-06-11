@@ -2333,6 +2333,9 @@ long EngineDrawObjects()
 				case T_EFFECT:
 					lpD3DDevice->SetTexture(0, txEffect->lpDDSTexture);
 					goto draw_2d_small;
+                case T_SHOT:
+                    lpD3DDevice->SetTexture(0, txEffect->lpDDSTexture);
+                    goto draw_2d_small;
 				case T_CREATURE:
 					if(thing->Thing.Model == M_CREATURE_EAGLE)
 					{
@@ -4862,6 +4865,8 @@ void EngineMouseLDown()
 					goto _2d_hit_small;
 				case T_EFFECT:
 					goto _2d_hit_small;
+                case T_SHOT:
+                    goto _2d_hit_small;
 				case T_CREATURE:
 					if(t->Thing.Model == M_CREATURE_EAGLE)
 					{

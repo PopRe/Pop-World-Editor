@@ -297,6 +297,10 @@
 #define ID_ACCEL_MARKERS                40015
 #define ID_HEADER_SCRIPT2				40016
 #define IDC_FILTER_SHOT                 40017
+#define IDC_SWAPTRIBE_HOSTBOT1          40018
+#define IDC_SWAPTRIBE_HOSTBOT2          40019
+#define IDC_SWAPTRIBE_HOSTBOT3          40020
+#define IDC_SWAPTRIBE_HOSTBOT4          40021
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED

@@ -2510,6 +2510,7 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case IDX_OWNER_RED:     ThingSelected->Thing.Owner = OWNER_RED;     break;
 				case IDX_OWNER_YELLOW:  ThingSelected->Thing.Owner = OWNER_YELLOW;  break;
 				case IDX_OWNER_GREEN:   ThingSelected->Thing.Owner = OWNER_GREEN;   break;
+                case IDX_OWNER_HOSTBOT: ThingSelected->Thing.Owner = OWNER_HOSTBOT;   break;
 				}
 				DlgObjectUpdateInfo(hWnd);
 				DlgInfoUpdate(hDlgInfo);
@@ -2684,6 +2685,19 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					case IDX_M_VEHICLE_AIRSHIP: ThingSelected->Thing.Model = M_VEHICLE_AIRSHIP_1; break;
 					}
 					break;
+                case T_SHOT:
+                    switch (SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
+                    {
+                    case IDX_M_SHOT_STANDARD:                  ThingSelected->Thing.Model = M_SHOT_STANDARD;                  break;
+                    case IDX_M_SHOT_STANDARD_2:                ThingSelected->Thing.Model = M_SHOT_STANDARD_2;                break;
+                    case IDX_M_SHOT_STANDARD_3:                ThingSelected->Thing.Model = M_SHOT_STANDARD_3;                break;
+                    case IDX_M_SHOT_FIREBALL:                  ThingSelected->Thing.Model = M_SHOT_FIREBALL;                  break;
+                    case IDX_M_SHOT_LIGHTNING:                 ThingSelected->Thing.Model = M_SHOT_LIGHTNING;                 break;
+                    case IDX_M_SHOT_SUPER_WARRIOR:             ThingSelected->Thing.Model = M_SHOT_SUPER_WARRIOR;             break;
+                    case IDX_M_SHOT_VOLCANO_FIREBALL_1:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_1;        break;
+                    case IDX_M_SHOT_VOLCANO_FIREBALL_2:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_2;        break;
+                    }
+                    break;
 				case T_EFFECT:
 					switch(SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
 					{
@@ -2778,19 +2792,6 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					memset(&ThingSelected->Thing.Bluff, 0, sizeof(ThingSelected->Thing.Bluff));
 _effect_lb:
 					break;
-                case T_SHOT:
-                    switch (SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
-                    {
-                    case IDX_M_SHOT_STANDARD:                  ThingSelected->Thing.Model = M_SHOT_STANDARD;                  break;
-                    case IDX_M_SHOT_STANDARD_2:                ThingSelected->Thing.Model = M_SHOT_STANDARD_2;                break;
-                    case IDX_M_SHOT_STANDARD_3:                ThingSelected->Thing.Model = M_SHOT_STANDARD_3;                break;
-                    case IDX_M_SHOT_FIREBALL:                  ThingSelected->Thing.Model = M_SHOT_FIREBALL;                  break;
-                    case IDX_M_SHOT_LIGHTNING:                 ThingSelected->Thing.Model = M_SHOT_LIGHTNING;                 break;
-                    case IDX_M_SHOT_SUPER_WARRIOR:             ThingSelected->Thing.Model = M_SHOT_SUPER_WARRIOR;             break;
-                    case IDX_M_SHOT_VOLCANO_FIREBALL_1:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_1;        break;
-                    case IDX_M_SHOT_VOLCANO_FIREBALL_2:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_2;        break;
-                    }
-                    break;
 				}
 				DlgObjectUpdateInfo(hWnd);
 				DlgInfoUpdate(hDlgInfo);
@@ -2851,6 +2852,7 @@ void DlgObjectUpdateInfo(HWND hWnd, bool lock)
 		case OWNER_RED:    SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_RED, 0);    break;
 		case OWNER_YELLOW: SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_YELLOW, 0); break;
 		case OWNER_GREEN:  SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_GREEN, 0);  break;
+        case OWNER_HOSTBOT:  SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_HOSTBOT, 0);  break;
 		default: SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_NEUTRAL, 0);
 		}
 
@@ -3151,6 +3153,23 @@ _scenery_skip_rotate:
 			case M_VEHICLE_AIRSHIP_2: SendMessage(hItem, CB_SETCURSEL, IDX_M_VEHICLE_AIRSHIP, 0); break;
 			}
 			break;
+        case T_SHOT:
+            SendMessage(hItem, CB_SETCURSEL, IDX_T_SHOT, 0);
+            DlgObjectSetShotList(hWnd);
+            hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
+            EnableWindow(hItem, true);
+            switch (ThingSelected->Thing.Model)
+            {
+            case M_SHOT_STANDARD:                       SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_STANDARD, 0);                      break;
+            case M_SHOT_STANDARD_2:                     SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_STANDARD_2, 0);                    break;
+            case M_SHOT_STANDARD_3:                     SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_STANDARD_3, 0);                    break;
+            case M_SHOT_FIREBALL:                       SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_FIREBALL, 0);                      break;
+            case M_SHOT_LIGHTNING:                      SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_LIGHTNING, 0);                     break;
+            case M_SHOT_SUPER_WARRIOR:                  SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_SUPER_WARRIOR, 0);                 break;
+            case M_SHOT_VOLCANO_FIREBALL_1:             SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_VOLCANO_FIREBALL_1, 0);            break;
+            case M_SHOT_VOLCANO_FIREBALL_2:             SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_VOLCANO_FIREBALL_2, 0);            break;
+            }
+            break;
 		default:
 			SendMessage(hItem, CB_SETCURSEL, -1, 0);
 			hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
@@ -3451,6 +3470,25 @@ void DlgObjectSetVehicleList(HWND hWnd)
 	SendMessage(hItem, CB_RESETCONTENT, 0, 0);
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_VEHICLE_BOAT);
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_VEHICLE_AIRSHIP);
+}
+
+void DlgObjectSetShotList(HWND hWnd)
+{
+    if (!hWnd) return;
+
+    //
+
+    HWND hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
+    if (!hItem) return;
+    SendMessage(hItem, CB_RESETCONTENT, 0, 0);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_STANDARD);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_STANDARD_2);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_STANDARD_3);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_FIREBALL);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_LIGHTNING);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_SUPER_WARRIOR);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_VOLCANO_FIREBALL_1);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_VOLCANO_FIREBALL_2);
 }
 
 
@@ -3908,6 +3946,9 @@ bool DlgFilterIsInFilter(THING *t)
 	case OWNER_GREEN:
 		if(!(ObjectFilterFlags & OFF_GREEN)) return false;
 		break;
+    case OWNER_HOSTBOT:
+        if (!(ObjectFilterFlags & OFF_HOSTBOT)) return false;
+        break;
 	default:
 		if(!(ObjectFilterFlags & OFF_NEUTRAL)) return false;
 	}
@@ -3937,6 +3978,7 @@ bool DlgFilterIsInFilter(THING *t)
 		break;
     case T_SHOT:
         if (ObjectFilterFlags & OFF_SHOT) return true;
+        break;
 	default:
 		if(ObjectFilterFlags & OFF_UNKNOW) return true;
 	}
@@ -4653,6 +4695,7 @@ int __stdcall DlgLinkProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case OWNER_RED:    dw = COLOR_LIST_RED;    break;
 				case OWNER_YELLOW: dw = COLOR_LIST_YELLOW; break;
 				case OWNER_GREEN:  dw = COLOR_LIST_GREEN;  break;
+                case OWNER_HOSTBOT: dw = COLOR_LIST_NEUTRAL; break;
 				default: dw = COLOR_LIST_NEUTRAL;
 				}
 			}
@@ -4961,6 +5004,7 @@ int __stdcall DlgListProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case OWNER_RED:    dw = COLOR_LIST_RED;    break;
 				case OWNER_YELLOW: dw = COLOR_LIST_YELLOW; break;
 				case OWNER_GREEN:  dw = COLOR_LIST_GREEN;  break;
+                case OWNER_HOSTBOT: dw = COLOR_LIST_NEUTRAL; break;
 				default: dw = COLOR_LIST_NEUTRAL;
 				}
 			}
@@ -7116,6 +7160,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 		t1 = OWNER_YELLOW;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN1) == BST_CHECKED)
 		t1 = OWNER_GREEN;
+    else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT1) == BST_CHECKED)
+        t2 = OWNER_HOSTBOT;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL1) == BST_CHECKED)
 		t1 = OWNER_NEUTRAL;
 	else
@@ -7129,6 +7175,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 		t2 = OWNER_YELLOW;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN2) == BST_CHECKED)
 		t2 = OWNER_GREEN;
+    else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT2) == BST_CHECKED)
+        t2 = OWNER_HOSTBOT;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL2) == BST_CHECKED)
 		t2 = OWNER_NEUTRAL;
 	else
@@ -7144,6 +7192,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 			t3 = OWNER_YELLOW;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN3) == BST_CHECKED)
 			t3 = OWNER_GREEN;
+        else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT3) == BST_CHECKED)
+            t2 = OWNER_HOSTBOT;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL3) == BST_CHECKED)
 			t3 = OWNER_NEUTRAL;
 		else
@@ -7157,6 +7207,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 			t4 = OWNER_YELLOW;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN4) == BST_CHECKED)
 			t4 = OWNER_GREEN;
+        else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT4) == BST_CHECKED)
+            t2 = OWNER_HOSTBOT;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL4) == BST_CHECKED)
 			t4 = OWNER_NEUTRAL;
 		else
@@ -7205,6 +7257,10 @@ int __stdcall DlgSwapTribeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case IDC_SWAPTRIBE_YELLOW2:
 		case IDC_SWAPTRIBE_GREEN2:
 		case IDC_SWAPTRIBE_NEUTRAL2:
+        case IDC_SWAPTRIBE_HOSTBOT1:
+        case IDC_SWAPTRIBE_HOSTBOT2:
+        case IDC_SWAPTRIBE_HOSTBOT3:
+        case IDC_SWAPTRIBE_HOSTBOT4:
 		case IDC_SWAPTRIBE_BLUE3:
 		case IDC_SWAPTRIBE_RED3:
 		case IDC_SWAPTRIBE_YELLOW3:
