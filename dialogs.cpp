@@ -1463,6 +1463,7 @@ void GetThingName(THING *t, char *str)
 		}
 		break;
     case T_SHOT:
+        sprintf(str, "%s: ", SZ_SHOT);
         switch (t->Thing.Model)
         {
         case M_SHOT_STANDARD:                  strcat(str, SZ_SHOT_STANDARD);                  break;
