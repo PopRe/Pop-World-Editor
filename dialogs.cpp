@@ -6133,6 +6133,7 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_INITDIALOG:
 		SendDlgItemMessage(hWnd, IDC_HEADER_LEVEL_NAME, EM_LIMITTEXT, 31, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_N_PLAYERS, EM_LIMITTEXT, 3, 0);
+        SendDlgItemMessage(hWnd, IDC_HEADER_CP_BLUE, EM_LIMITTEXT, 3, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_CP_RED, EM_LIMITTEXT, 3, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_CP_YELLOW, EM_LIMITTEXT, 3, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_CP_GREEN, EM_LIMITTEXT, 3, 0);
@@ -6216,6 +6217,29 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
+        case IDC_HEADER_CP_BLUE:
+            switch (HIWORD(wParam))
+            {
+            case EN_CHANGE:
+            {
+                GetWindowText((HWND)lParam, str, sizeof(str));
+                int i;
+                if (GetInt(str, &i))
+                {
+                    if (i < 0) i = 0;
+                    else if (i > 255) i = 255;
+                    leveldat->Header.v2.ComputerPlayerIndex[0] = i;
+                }
+            }
+            break;
+
+            case EN_KILLFOCUS:
+                sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[0]);
+                SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
+                break;
+            }
+            break;
+
 		case IDC_HEADER_CP_RED:
 			switch(HIWORD(wParam))
 			{
@@ -6227,13 +6251,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
-						leveldat->Header.v2.ComputerPlayerIndex[0] = i;
+                        leveldat->Header.v2.OldComputerPlayerIndex[0] = i;
+						leveldat->Header.v2.ComputerPlayerIndex[1] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[0]);
+				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[1]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -6250,13 +6275,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
-						leveldat->Header.v2.ComputerPlayerIndex[1] = i;
+                        leveldat->Header.v2.OldComputerPlayerIndex[1] = i;
+						leveldat->Header.v2.ComputerPlayerIndex[2] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[1]);
+				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[2]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -6273,13 +6299,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
-						leveldat->Header.v2.ComputerPlayerIndex[2] = i;
+                        leveldat->Header.v2.OldComputerPlayerIndex[2] = i;
+						leveldat->Header.v2.ComputerPlayerIndex[3] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[2]);
+				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[3]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -6304,13 +6331,16 @@ void DlgHeaderUpdate(HWND hWnd)
 	sprintf(str, "%d", leveldat->Header.v2.NumPlayers);
 	SetDlgItemText(hWnd, IDC_HEADER_N_PLAYERS, str);
 
-	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[0]);
-	SetDlgItemText(hWnd, IDC_HEADER_CP_RED, str);
+    sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[0]);
+    SetDlgItemText(hWnd, IDC_HEADER_CP_BLUE, str);
 
 	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[1]);
-	SetDlgItemText(hWnd, IDC_HEADER_CP_YELLOW, str);
+	SetDlgItemText(hWnd, IDC_HEADER_CP_RED, str);
 
 	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[2]);
+	SetDlgItemText(hWnd, IDC_HEADER_CP_YELLOW, str);
+
+	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[3]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_GREEN, str);
 
 	if(leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_USE_FOG)

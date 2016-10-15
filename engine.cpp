@@ -2806,7 +2806,7 @@ long EngineLoadLevel(char *filename)
 
 	dwRW = 0;
 	ReadFile(h, &leveldat->Header.v2, sizeof(leveldat->Header.v2), &dwRW, 0);
-	if(dwRW != sizeof(leveldat->Header.v2))
+	if (dwRW == 0)
 	{
 		CloseHandle(h);
 
@@ -2819,6 +2819,19 @@ long EngineLoadLevel(char *filename)
 	}
 
 	CloseHandle(h);
+
+    // Check to see if the old computer indices should be copied over to the new.
+    if ((leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_ALLOW_ANY_COMPUTER_CONTROLLED_TRIBE) == 0)
+    {
+        // Populate the computer player indices from the old computer player indices.
+        for (int i = 1; i < 4; ++i)
+        {
+            leveldat->Header.v2.ComputerPlayerIndex[i] = leveldat->Header.v2.OldComputerPlayerIndex[i - 1];
+        }
+
+        // Enable the ability to set a computer script for the blue tribe.
+        leveldat->Header.v2.LevelFlags |= LEVEL_FLAGS_ALLOW_ANY_COMPUTER_CONTROLLED_TRIBE;
+    }
 
 	for(int a = 0; a < 256; a++)
 	{
@@ -2910,6 +2923,25 @@ long EngineSaveLevelV3(char *filename)
 	}
 
 	CloseHandle(h);
+
+    // Check to see if the old computer indices should be copied over to the new.
+    if ((leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_ALLOW_ANY_COMPUTER_CONTROLLED_TRIBE) == 0)
+    {
+        // Populate the computer player indices from the old computer player indices.
+        for (int i = 1; i < 4; ++i)
+        {
+            leveldat->Header.v2.ComputerPlayerIndex[i] = leveldat->Header.v2.OldComputerPlayerIndex[i - 1];
+        }
+
+        // Enable the ability to set a computer script for the blue tribe.
+        leveldat->Header.v2.LevelFlags |= LEVEL_FLAGS_ALLOW_ANY_COMPUTER_CONTROLLED_TRIBE;
+    }
+
+    for (int a = 0; a < 256; a++)
+    {
+        Markers[a].x = (float)((leveldat->Header.v2.Markers[a] & 0xFF) / 2) + 0.5f;
+        Markers[a].z = (float)((leveldat->Header.v2.Markers[a] >> 8) / 2) + 0.5f;
+    }
 
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);

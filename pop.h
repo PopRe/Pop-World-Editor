@@ -734,12 +734,13 @@ http://alacn.dnsalias.org:8080/
 
 // -=-=- level flags -=-=-
 
-#define LEVEL_FLAGS_USE_FOG				(1<<0)
-#define LEVEL_FLAGS_SHAMAN_OMNI			(1<<1)
-//#define LEVEL_FLAGS_FORCE640X480		(1<<2)
-//#define LEVEL_FLAGS_LEVEL_EDIT		(1<<3)
-#define LEVEL_FLAGS_NO_GUEST			(1<<4)
-#define LEVEL_NO_REINCARNATE_TIME		(1<<5)
+#define LEVEL_FLAGS_USE_FOG				                    (1<<0)
+#define LEVEL_FLAGS_SHAMAN_OMNI			                    (1<<1)
+//#define LEVEL_FLAGS_FORCE640X480		                    (1<<2)
+//#define LEVEL_FLAGS_LEVEL_EDIT		                    (1<<3)
+#define LEVEL_FLAGS_NO_GUEST			                    (1<<4)
+#define LEVEL_NO_REINCARNATE_TIME		                    (1<<5)
+#define LEVEL_FLAGS_ALLOW_ANY_COMPUTER_CONTROLLED_TRIBE     (1<<6)
 
 
 // -=-=- angles -=-=-
@@ -811,7 +812,7 @@ struct LEVELHEADERv2
 	PLAYERTHINGS				DefaultThings;
 	CHAR						Name[32];
 	UBYTE						NumPlayers;
-	UBYTE						ComputerPlayerIndex[3];
+	UBYTE						OldComputerPlayerIndex[3];
 	UBYTE						DefaultAllies[4];
 	UBYTE						LevelType;
 	UBYTE						ObjectsBankNum;
@@ -820,6 +821,8 @@ struct LEVELHEADERv2
 	UWORD						Markers[256];
 	UWORD						StartPos;
 	UWORD						StartAngle;
+	// New fields go after this line to maintain backwards compatibility with the original Bullfrog release.
+	UBYTE                       ComputerPlayerIndex[4]; // computer player indices (All tribes)
 };
 
 #define	MAX_LENGTH_SAVE_NAMEv2				(32)
