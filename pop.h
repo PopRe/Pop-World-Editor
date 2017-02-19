@@ -740,7 +740,6 @@ http://alacn.dnsalias.org:8080/
 //#define LEVEL_FLAGS_LEVEL_EDIT		                    (1<<3)
 #define LEVEL_FLAGS_NO_GUEST			                    (1<<4)
 #define LEVEL_NO_REINCARNATE_TIME		                    (1<<5)
-#define LEVEL_FLAGS_ALLOW_ANY_COMPUTER_CONTROLLED_TRIBE     (1<<6)
 
 
 // -=-=- angles -=-=-
@@ -817,12 +816,10 @@ struct LEVELHEADERv2
 	UBYTE						LevelType;
 	UBYTE						ObjectsBankNum;
 	UBYTE						LevelFlags;
-	UBYTE						Pad[1];
+    UBYTE						BlueComputerPlayerIndex;
 	UWORD						Markers[256];
 	UWORD						StartPos;
 	UWORD						StartAngle;
-	// New fields go after this line to maintain backwards compatibility with the original Bullfrog release.
-	UBYTE                       ComputerPlayerIndex[4]; // computer player indices (All tribes)
 };
 
 #define	MAX_LENGTH_SAVE_NAMEv2				(32)
@@ -830,6 +827,7 @@ struct LEVELHEADERv2
 struct LEVELHEADERv3
 {
 	LEVELHEADERv2				v2;
+    UBYTE                       ComputerPlayerIndex[4];
 	UBYTE						Version;								// How many objects are in the level
 	ULONG						MaxAltPoints;							// How many points are in the level
 	ULONG						MaxNumObjects;							// How many objects are in the level

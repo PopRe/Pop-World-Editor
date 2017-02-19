@@ -6228,13 +6228,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 {
                     if (i < 0) i = 0;
                     else if (i > 255) i = 255;
-                    leveldat->Header.v2.ComputerPlayerIndex[0] = i;
+                    leveldat->Header.v2.BlueComputerPlayerIndex = i;
+                    leveldat->Header.ComputerPlayerIndex[0] = i;
                 }
             }
             break;
 
             case EN_KILLFOCUS:
-                sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[0]);
+                sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[0]);
                 SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
                 break;
             }
@@ -6252,13 +6253,13 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
                         leveldat->Header.v2.OldComputerPlayerIndex[0] = i;
-						leveldat->Header.v2.ComputerPlayerIndex[1] = i;
+						leveldat->Header.ComputerPlayerIndex[1] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[1]);
+				sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[1]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -6276,13 +6277,13 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
                         leveldat->Header.v2.OldComputerPlayerIndex[1] = i;
-						leveldat->Header.v2.ComputerPlayerIndex[2] = i;
+						leveldat->Header.ComputerPlayerIndex[2] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[2]);
+				sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[2]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -6300,13 +6301,13 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
                         leveldat->Header.v2.OldComputerPlayerIndex[2] = i;
-						leveldat->Header.v2.ComputerPlayerIndex[3] = i;
+						leveldat->Header.ComputerPlayerIndex[3] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[3]);
+				sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[3]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -6331,16 +6332,16 @@ void DlgHeaderUpdate(HWND hWnd)
 	sprintf(str, "%d", leveldat->Header.v2.NumPlayers);
 	SetDlgItemText(hWnd, IDC_HEADER_N_PLAYERS, str);
 
-    sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[0]);
+    sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[0]);
     SetDlgItemText(hWnd, IDC_HEADER_CP_BLUE, str);
 
-	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[1]);
+	sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[1]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_RED, str);
 
-	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[2]);
+	sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[2]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_YELLOW, str);
 
-	sprintf(str, "%d", leveldat->Header.v2.ComputerPlayerIndex[3]);
+	sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[3]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_GREEN, str);
 
 	if(leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_USE_FOG)
