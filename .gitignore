@@ -18,6 +18,9 @@
 *.a
 *.lib
 
+# Build Directory
+build/
+
 # Executables
 *.exe
 *.out
@@ -69,3 +72,8 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+
+# Visual Studio User Files
+.VS
+*.VC.opendb
+*.VC.db

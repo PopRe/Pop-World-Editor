@@ -14,6 +14,7 @@ http://alacn.dnsalias.org:8080/
 #include "pop.h"
 #include "engine.h"
 #include "dialogs.h"
+#include "user_storage.h"
 
 
 
@@ -36,20 +37,25 @@ long __stdcall WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 bool RegisterCreateMainWindow();
 void ProcessCommandLine(char *cmdline);
 
-
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, char *szCmdLine, int)
 {
 	hInst = hInstance;
 
 	dwScreenWidth	= 640;
 	dwScreenHeight	= 480;
-	dwScreenDepth	= 16;
+	dwScreenDepth	= 32;
 	//guidDevice		= IID_IDirect3DHALDevice;
 	//strcpy(szDeviceName, "Direct3D HAL");
 	guidDevice		= IID_IDirect3DTnLHalDevice;
 	strcpy(szDeviceName, "Direct3D TnLHal");
 	fHwDevice		= true;
 	fFullScreen		= true;
+
+	if (!InitializeUserFiles())
+	{
+		MessageBox(NULL, _T("Failed to initialize user files."), _T("Initialization Error"), MB_ICONERROR | MB_OK);
+		return -1;
+	}
 
 	GetCurrentDirectory(sizeof(szStartPath), szStartPath);
 

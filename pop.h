@@ -1,4 +1,3 @@
-
 /*
 
 Alacn
@@ -6,16 +5,15 @@ alacn.uhahaa@gmail.com
 http://alacn.dnsalias.org:8080/
 
 */
-
-#define MAX_THINGS							2000
+#pragma once
+#define MAX_THINGS							66535
+#define MAX_V2_THINGS						2000
 #define MAX_THINGS_LOAD						100
 #define	MAX_MANA_VALUE						1000000
 
 #define LEVEL_PREFIX						".dat"
 #define HEADER_PREFIX						".hdr"
 #define VERSION_PREFIX						".ver"
-
-
 
 // -=-=- obj bank -=-=-
 #define SZ_OBJ_BANK_0						"bank 0"
@@ -255,12 +253,14 @@ http://alacn.dnsalias.org:8080/
 #define OWNER_RED							1
 #define OWNER_YELLOW						2
 #define OWNER_GREEN							3
+#define OWNER_HOSTBOT						4 // Mostly reserved.
 //
 #define SZ_OWNER_NEUTRAL					"Neutral"
 #define SZ_OWNER_BLUE						"Blue"
 #define SZ_OWNER_RED						"Red"
 #define SZ_OWNER_YELLOW						"Yellow"
 #define SZ_OWNER_GREEN						"Green"
+#define SZ_OWNER_HOSTBOT					"Hostbot"
 
 // - types -
 #define T_PERSON							1
@@ -270,7 +270,7 @@ http://alacn.dnsalias.org:8080/
 #define T_SCENERY							5
 #define T_GENERAL							6
 #define T_EFFECT							7
-//#define T_SHOT							8
+#define T_SHOT							    8
 //#define T_SHAPE							9
 //#define T_INTERNAL						10
 #define T_SPELL								11
@@ -283,6 +283,7 @@ http://alacn.dnsalias.org:8080/
 #define SZ_GENERAL							"General"
 #define SZ_EFFECT							"Effect"
 #define SZ_SPELL							"Spell"
+#define SZ_SHOT                             "Shot"
 #define SZ_SPECIAL							"Special" // top/sub level scenery
 
 
@@ -520,6 +521,7 @@ http://alacn.dnsalias.org:8080/
 #define M_EFFECT_STATUE_TO_AOD				91
 #define M_EFFECT_FILL_ONE_SHOTS				92
 #define M_EFFECT_FIRE_ROLL_ELEM				93 // no effect?
+#define	M_EFFECT_ARMA_ARENA					94
 //
 #define SZ_EFFECT_SIMPLE_BLAST				"simple blast"
 #define SZ_EFFECT_SPRITE_CIRCLES			"circles"
@@ -598,9 +600,9 @@ http://alacn.dnsalias.org:8080/
 #define SZ_EFFECT_ATLANTIS_INVOKE			"atlantis invoke"
 #define SZ_EFFECT_STATUE_TO_AOD				"statue to aod"
 #define SZ_EFFECT_FILL_ONE_SHOTS			"fill one shots"
+#define SZ_EFFECT_ARMA_ARENA				"arma arena"
 
 // - shot -
-/*
 #define M_SHOT_STANDARD						1
 #define M_SHOT_STANDARD_2					2
 #define M_SHOT_STANDARD_3					3
@@ -609,7 +611,15 @@ http://alacn.dnsalias.org:8080/
 #define M_SHOT_SUPER_WARRIOR				6
 #define M_SHOT_VOLCANO_FIREBALL_1			7
 #define M_SHOT_VOLCANO_FIREBALL_2			8
-*/
+
+#define SZ_SHOT_STANDARD					"standard"
+#define SZ_SHOT_STANDARD_2					"standard 2"
+#define SZ_SHOT_STANDARD_3					"standard 3"
+#define SZ_SHOT_FIREBALL					"fireball"
+#define SZ_SHOT_LIGHTNING					"lightning"
+#define SZ_SHOT_SUPER_WARRIOR				"super warrior"
+#define SZ_SHOT_VOLCANO_FIREBALL_1			"volcano fireball 1"
+#define SZ_SHOT_VOLCANO_FIREBALL_2			"volcano fireball 2"
 
 // - internal -
 /*
@@ -724,11 +734,12 @@ http://alacn.dnsalias.org:8080/
 
 // -=-=- level flags -=-=-
 
-#define LEVEL_FLAGS_USE_FOG				(1<<0)
-#define LEVEL_FLAGS_SHAMAN_OMNI			(1<<1)
-//#define LEVEL_FLAGS_FORCE640X480		(1<<2)
-//#define LEVEL_FLAGS_LEVEL_EDIT		(1<<3)
-#define LEVEL_FLAGS_NO_GUEST			(1<<4)
+#define LEVEL_FLAGS_USE_FOG				                    (1<<0)
+#define LEVEL_FLAGS_SHAMAN_OMNI			                    (1<<1)
+//#define LEVEL_FLAGS_FORCE640X480		                    (1<<2)
+//#define LEVEL_FLAGS_LEVEL_EDIT		                    (1<<3)
+#define LEVEL_FLAGS_NO_GUEST			                    (1<<4)
+#define LEVEL_NO_REINCARNATE_TIME		                    (1<<5)
 
 
 // -=-=- angles -=-=-
@@ -795,21 +806,33 @@ struct PLAYERTHINGS
 	UBYTE						Flags;
 };
 
-
-struct LEVELHEADER
+struct LEVELHEADERv2
 {
 	PLAYERTHINGS				DefaultThings;
 	CHAR						Name[32];
 	UBYTE						NumPlayers;
-	UBYTE						ComputerPlayerIndex[3];
+	UBYTE						OldComputerPlayerIndex[3];
 	UBYTE						DefaultAllies[4];
 	UBYTE						LevelType;
 	UBYTE						ObjectsBankNum;
 	UBYTE						LevelFlags;
-	UBYTE						Pad[1];
+    UBYTE						BlueComputerPlayerIndex;
 	UWORD						Markers[256];
 	UWORD						StartPos;
 	UWORD						StartAngle;
+};
+
+#define	MAX_LENGTH_SAVE_NAMEv2				(32)
+#define	MAX_NUM_SCRIPT2						10
+struct LEVELHEADERv3
+{
+	LEVELHEADERv2				v2;
+    UBYTE                       ComputerPlayerIndex[4];
+	UBYTE						Version;								// How many objects are in the level
+	ULONG						MaxAltPoints;							// How many points are in the level
+	ULONG						MaxNumObjects;							// How many objects are in the level
+	ULONG						MaxNumPlayers;							// How many players are in the level
+	CHAR						Script2[MAX_NUM_SCRIPT2][MAX_LENGTH_SAVE_NAMEv2];
 };
 
 
@@ -900,8 +923,17 @@ struct THINGSAVE
 	};
 };
 
+struct LEVELDATv3
+{
+	char						MAGIC[5];
+	struct LEVELHEADERv3		Header;
+	WORD						GroundHeight[128 * 128];
+	BYTE						NoAccessSquares[128 * 128];
+	PLAYERSAVEINFO				psi[4];
+	SUNLIGHTSAVEINFO			ssi;
+};
 
-struct LEVELDAT
+struct LEVELDATv2
 {
 	WORD						GroundHeight[128 * 128];
 	BYTE						LandBlocks[128 * 128];
@@ -909,7 +941,7 @@ struct LEVELDAT
 	BYTE						NoAccessSquares[128 * 128];
 	PLAYERSAVEINFO				psi[4];
 	SUNLIGHTSAVEINFO			ssi;
-	THINGSAVE					Things[MAX_THINGS];
+	THINGSAVE					Things[MAX_V2_THINGS];
 	ACCESSSAVEINFO asi[50];
 };
 

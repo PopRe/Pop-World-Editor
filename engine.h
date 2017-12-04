@@ -12,7 +12,8 @@ http://alacn.dnsalias.org:8080/
 #define D3D_OVERLOADS
 #include <ddraw.h>
 #include <d3d.h>
-
+#include <vector>
+#include "Pop.h"
 
 
 #define COLOR_RENDER_BG			0x007CF0
@@ -74,20 +75,20 @@ http://alacn.dnsalias.org:8080/
 #define SZ_ERR_CREATEFILE							"CreateFile Failed: %s"
 #define SZ_ERR_READERROR							"Read Error at: %s"
 #define SZ_ERR_WRITEERROR							"Write Error at: %s"
+#define SZ_ERR_MAGIC_MISMATCH						"LEVEL3 Keyword not found, reverting to Level2 format: %s"
 
 #define GROUND_X_SIZE					128
 #define GROUND_Z_SIZE					128
 #define GROUND_BLOCK_HEIGHT				0.005f
 
-#define VIEW_RANGE						25
-#define VIEW_RANGE_2					50
+#define VIEW_RANGE						30
+#define VIEW_RANGE_2					60
 
-#define VIEW_RANGE_CLICK_MIN			15 // VIEW_RANGE -+ 10
-#define VIEW_RANGE_CLICK_MAX			35
-#define VIEW_RANGE_CLICK				10
+#define VIEW_RANGE_CLICK_MIN			10 // VIEW_RANGE -+ 20
+#define VIEW_RANGE_CLICK_MAX			50
+#define VIEW_RANGE_CLICK				20
 
 #define SPHERE_RATIO					0.01f
-#define GROUNDEDIT_RANGE				15
 #define GROUND_HEIGHT_MAX				0x0700
 
 #define MINIMAP_TEXTURE_SIZE			128
@@ -112,6 +113,13 @@ http://alacn.dnsalias.org:8080/
 #define SPEED_ROT_X						0.0000000007f
 #define SPEED_ROT_Y						0.0000000007f
 #define SPEED_ROT_Z						0.0000000007f
+#define SPEED_POS_Y_ZOOM				0.00000000021f
+
+#define MIN_POS_Y						5.5f
+#define MAX_SPERICAL_POS_Y				20.0f
+#define MAX_POS_Y						30.0f
+#define MIN_ROT_X						35.0f
+#define MAX_ROT_X						85.0f
 
 #define MINIMAP_Z						5.0f
 #define MINIMAP_X_ORIENTATION			1.0f
@@ -133,6 +141,9 @@ http://alacn.dnsalias.org:8080/
 #define EF_BOUNDINGBOX					(1 << 10)
 #define EF_HIDE_OBJS_ON_MINIMAP			(1 << 11)
 #define EF_SHOW_MARKERS					(1 << 12)
+
+#define LEVEL_FORMAT_MODE_V2			0
+#define LEVEL_FORMAT_MODE_V3			1
 
 
 
@@ -247,9 +258,9 @@ extern bool						fHwDevice;
 extern LPDIRECTDRAW7			lpDD;
 extern LPDIRECTDRAWSURFACE7		lpDDSPrimary,
 								lpDDSBackBuffer;
+extern LEVELDATv3				*leveldat;
 extern LPDIRECT3DDEVICE7		lpD3DDevice;
 extern WORD						wEngineGround[GROUND_X_SIZE * GROUND_Z_SIZE];
-extern LEVELHEADER				LevelHeader;
 extern MARKER					Markers[256];
 extern int						MarkerSelected;
 extern LEVELVERSION				LevelVersion;
@@ -261,7 +272,8 @@ extern float					fEnginePosX,
 								fEngineRotZ;
 extern int						GroundEditBrushSize,
 								GroundEditBrushSpeed,
-								ObjectsCount;
+								ObjectsCount,
+								LevelFormatMode;
 extern TEXTURE					*Textures;
 extern OBJ3D					*Objs3D;
 extern THING					*Things,
@@ -280,6 +292,8 @@ extern POINT					ptCursor,
 								ptCaptured;
 extern MOUSEBUTTON				MouseButton;
 extern DWORD					LANDSCAPE_COLORS[256];
+
+extern std::vector<THINGSAVE> Objects;
 
 
 
@@ -300,6 +314,8 @@ long EngineDrawObjects();
 long EngineDrawMiniMap();
 long EngineLoadLevel(char *filename);
 long EngineSaveLevel(char *filename);
+long EngineLoadLevelV3(char *filename);
+long EngineSaveLevelV3(char *filename);
 long EngineUpdateView();
 WORD EngineGetGroundHeight(int x, int z);
 void EngineSetGroundHeight(int x, int z, WORD h);

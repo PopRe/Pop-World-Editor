@@ -9,19 +9,22 @@ http://alacn.dnsalias.org:8080/
 
 #include "std.h"
 #include "popedt.h"
+#include "user_storage.h"
 #include "log.h"
 
 
 
 HANDLE hLog = INVALID_HANDLE_VALUE;
-
+char szLogFilePath[MAX_PATH];
 
 
 long LogCreate()
 {
 	if(hLog != INVALID_HANDLE_VALUE) return -1;
 
-	hLog = CreateFile(LOG_FILE, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if(!GetApplicationUserDataFilePath(LOG_FILE, szLogFilePath)) return -1;
+
+	hLog = CreateFile(szLogFilePath, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 	if(hLog == INVALID_HANDLE_VALUE) return -1;
 
 	LogWrite(LOG_TITLE);

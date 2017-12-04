@@ -11,8 +11,8 @@ http://alacn.dnsalias.org:8080/
 #define POPEDT_MENUBAR_NAME							"Menu"
 
 #define POPEDT_MENUBAR								"PopEdtMenuBar"
-#define POPEDT_MENUBAR_WIDTH						120
-#define POPEDT_MENUBAR_HEIGHT						50
+#define POPEDT_MENUBAR_WIDTH						120+9
+#define POPEDT_MENUBAR_HEIGHT						40+13
 
 
 #define SZ_MENU_FILE								"File"
@@ -22,14 +22,17 @@ http://alacn.dnsalias.org:8080/
 #define SZ_DEVICECONFIRM_TIME						"Auto Restoring in %d seconds..."
 
 #define SZ_CONFIRM_NEW_LEVEL						"Current Map will be lost!\ndo you want continue?"
+#define SZ_CONFIRM_MAX_L2_OBJECTS					"Warning, this map has more objects than supported by Level2\nwould you like to switch to Level3 format instead?\n\nPressing No will result in some objects being lost."
 
 #define SZ_OPENLEVEL_TITLE							"Open Level"
-#define SZ_OPENLEVEL_FILTER							"Populous Levels (levl2*.dat)\0levl2*.dat\0Dat Files (*.dat)\0*.dat\0All Files (*.*)\0*.*\0\0"
+#define SZ_OPENLEVEL_FILTER							"Populous Levels Dat Files (*.dat)\0*.dat\0All Files (*.*)\0*.*\0\0"
+#define SZ_SAVELEVEL_FILTER							"Populous Level3 Format (*.dat)\0*.dat\0Populous Level2 Format (*.hdr;*.dat)\0*.dat\0\0"
 #define SZ_OPENLEVEL_FAILED							"Open Level Failed"
 #define SZ_SAVELEVEL_TITLE							"Save Level"
 #define SZ_SAVELEVEL_DEFEXT							".dat"
 #define SZ_SAVELEVEL_FAILED							"Save Level Failed"
-#define SZ_SAVELEVEL_DONE							"Level Saved"
+#define SZ_SAVELEVEL_DONE_V2						"Level Saved using Level2 Format"
+#define SZ_SAVELEVEL_DONE_V3						"Level Saved using Level3 Format"
 #define SZ_EXPORT_HEIGHTMAP_TITLE					"Export Height Map"
 #define SZ_EXPORT_HEIGHTMAP_FILTER					"Bitmaps (*.bmp)\0*.bmp\0All Files (*.*)\0*.*\0\0"
 #define SZ_EXPORT_HEIGHTMAP_DEFEXT					".bmp"
@@ -110,6 +113,7 @@ http://alacn.dnsalias.org:8080/
 #define IDX_OWNER_RED								2
 #define IDX_OWNER_YELLOW							3
 #define IDX_OWNER_GREEN								4
+#define IDX_OWNER_HOSTBOT							5
 
 #define IDX_T_PERSON								0
 #define IDX_T_BUILDING								1
@@ -120,6 +124,7 @@ http://alacn.dnsalias.org:8080/
 #define IDX_T_VEHICLE								6
 #define IDX_T_SPECIAL								7
 #define IDX_T_EFFECT								8
+#define IDX_T_SHOT								    9
 
 #define IDX_M_PERSON_WILD							0
 #define IDX_M_PERSON_BRAVE							1
@@ -319,6 +324,16 @@ http://alacn.dnsalias.org:8080/
 #define IDX_M_VEHICLE_BOAT							0
 #define IDX_M_VEHICLE_AIRSHIP						1
 
+#define IDX_M_SHOT_STANDARD						    1
+#define IDX_M_SHOT_STANDARD_2					    2
+#define IDX_M_SHOT_STANDARD_3					    3
+#define IDX_M_SHOT_FIREBALL						    4
+#define IDX_M_SHOT_LIGHTNING					    5
+#define IDX_M_SHOT_SUPER_WARRIOR				    6
+#define IDX_M_SHOT_VOLCANO_FIREBALL_1			    7
+#define IDX_M_SHOT_VOLCANO_FIREBALL_2			    8
+
+
 
 
 #define SZ_BRUSH_SIZE_TXT							"Size: %d"
@@ -346,6 +361,8 @@ http://alacn.dnsalias.org:8080/
 #define OFF_VEHICLE									0x00000400
 #define OFF_SPELL									0x00000800
 #define OFF_EFFECT									0x00001000
+#define OFF_SHOT									0x00002000
+#define OFF_HOSTBOT									0x00008000
 #define OFF_ALL										0xFFFFFFFF
 
 
@@ -427,6 +444,7 @@ void DlgObjectSetSpellList(HWND hWnd);
 void DlgObjectSetEffectList(HWND hWnd);
 void DlgObjectSetCreatureList(HWND hWnd);
 void DlgObjectSetVehicleList(HWND hWnd);
+void DlgObjectSetShotList(HWND hWnd);
 void DlgObjectNextObj();
 void DlgObjectPrevObj();
 void DlgObjectNewObj();
@@ -482,6 +500,12 @@ void DlgAlliesUpdate(HWND hWnd);
 void DlgSpellsBuildingsToggle();
 int __stdcall DlgSpellsBuildingsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void DlgSpellsBuildingsUpdate(HWND hWnd);
+
+// Script2 dialog
+void DlgScript2();
+int __stdcall DlgScript2Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void DlgScript2Update(HWND hWnd);
+
 
 // spells not charging dialog
 void DlgSpellsNotChargingToggle();

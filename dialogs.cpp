@@ -15,6 +15,7 @@ http://alacn.dnsalias.org:8080/
 #include "dialogs.h"
 #include "log.h"
 #include "script.h"
+#include "user_storage.h"
 
 
 
@@ -31,6 +32,7 @@ HWND hDlgDevice = 0,
 	 hDlgAbout = 0,
 	 hDlgAllies = 0,
 	 hDlgSpellsBuildings = 0,
+	 hDlgScript2 = 0,
 	 hDlgSpellsNotCharging = 0,
 	 hDlgHeader = 0,
 	 hDlgObjBank = 0,
@@ -115,11 +117,12 @@ void LevelOpen()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szLevel);
 
 	OPENFILENAME ofn;
-	memset(&ofn, 0, sizeof(ofn));
+	SecureZeroMemory(&ofn, sizeof(ofn));
+
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = hMainWnd;
 	ofn.lpstrTitle = SZ_OPENLEVEL_TITLE;
@@ -130,9 +133,9 @@ void LevelOpen()
 	ofn.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	LockDialogs(true);
-	if(GetOpenFileName(&ofn))
+	if(GetOpenFileNameA(&ofn))
 	{
-		if(EngineLoadLevel(filename) != S_OK)
+		if(EngineLoadLevelV3(filename) != S_OK)
 			ModalMsg(SZ_OPENLEVEL_FAILED, APPNAME, MB_ICONEXCLAMATION);
 	}
 	LockDialogs(false);
@@ -150,10 +153,10 @@ void LevelSave()
 {
 	if(lstrlen(szLevel) != 0)
 	{
-		if(EngineSaveLevel(szLevel) != S_OK)
+		if((LevelFormatMode == LEVEL_FORMAT_MODE_V3 ? EngineSaveLevelV3(szLevel) : EngineSaveLevel(szLevel)) != S_OK)
 			ModalMsg(SZ_SAVELEVEL_FAILED, APPNAME, MB_ICONEXCLAMATION);
 		else
-			ModalMsg(SZ_SAVELEVEL_DONE, APPNAME, MB_ICONASTERISK);
+			ModalMsg((LevelFormatMode == LEVEL_FORMAT_MODE_V3 ? SZ_SAVELEVEL_DONE_V3 : SZ_SAVELEVEL_DONE_V2), APPNAME, MB_ICONASTERISK);
 	}
 	else
 	{
@@ -167,7 +170,7 @@ void LevelSaveAs()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szLevel);
 
 	OPENFILENAME ofn;
@@ -179,16 +182,31 @@ void LevelSaveAs()
 	ofn.lpstrFile = filename;
 	ofn.nMaxFile = sizeof(filename);
 	ofn.lpstrInitialDir = strInitDir;
-	ofn.lpstrFilter = SZ_OPENLEVEL_FILTER;
+	ofn.lpstrFilter = SZ_SAVELEVEL_FILTER;
+	ofn.nFilterIndex = (LevelFormatMode == LEVEL_FORMAT_MODE_V3 ? 1 : 2);  //default the save as format based on the current level format
 	ofn.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
 	LockDialogs(true);
 	if(GetSaveFileName(&ofn))
 	{
-		if(EngineSaveLevel(filename) != S_OK)
-			ModalMsg(SZ_SAVELEVEL_FAILED, APPNAME, MB_ICONEXCLAMATION);
-		else
-			ModalMsg(SZ_SAVELEVEL_DONE, APPNAME, MB_ICONASTERISK);
+		//user selected level3 format
+		if (ofn.nFilterIndex == 1) {  //fyi, the selection starts with index 1, not 0 like you would think...
+			if (EngineSaveLevelV3(filename) != S_OK) {
+				ModalMsg(SZ_SAVELEVEL_FAILED, APPNAME, MB_ICONEXCLAMATION);
+			}
+			else {
+				ModalMsg(SZ_SAVELEVEL_DONE_V3, APPNAME, MB_ICONASTERISK);
+			}
+		}
+		//user selected level2 format
+		else {
+			if (EngineSaveLevel(filename) != S_OK) {
+				ModalMsg(SZ_SAVELEVEL_FAILED, APPNAME, MB_ICONEXCLAMATION);
+			}
+			else {
+				ModalMsg(SZ_SAVELEVEL_DONE_V2, APPNAME, MB_ICONASTERISK);
+			}
+		}
 	}
 	LockDialogs(false);
 }
@@ -199,7 +217,7 @@ void ExportHeightMap()
 	char filename[STR_SIZE],
 		 strInitDir[STR_SIZE];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	memset(filename, 0, sizeof(filename));
 
 	OPENFILENAME ofn;
@@ -375,7 +393,7 @@ void Lang2Text()
 	char flang[MAX_PATH], ftext[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(flang, szLang_Lang);
 
 	OPENFILENAME ofn;
@@ -397,7 +415,7 @@ void Lang2Text()
 
     //
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(ftext, szLang_Text);
 
 	//OPENFILENAME ofn;
@@ -509,7 +527,7 @@ void Text2Lang()
 	char flang[MAX_PATH], ftext[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(ftext, szLang_Text);
 
 	OPENFILENAME ofn;
@@ -531,7 +549,7 @@ void Text2Lang()
 
     //
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(flang, szLang_Lang);
 
 	//OPENFILENAME ofn;
@@ -1189,6 +1207,7 @@ long FinishDialogs()
 	if(hDlgAbout)				DlgAboutToggle();
 	if(hDlgAllies)				DlgAlliesToggle();
 	if(hDlgSpellsBuildings)		DlgSpellsBuildingsToggle();
+	if (hDlgScript2)			DlgScript2();
 	if(hDlgSpellsNotCharging)	DlgSpellsNotChargingToggle();
 	if(hDlgHeader)				DlgHeaderToggle();
 	if(hDlgObjBank)				DlgObjBankToggle();
@@ -1439,9 +1458,25 @@ void GetThingName(THING *t, char *str)
 		case M_EFFECT_ATLANTIS_INVOKE:         strcat(str, SZ_EFFECT_ATLANTIS_INVOKE);         break;
 		case M_EFFECT_STATUE_TO_AOD:           strcat(str, SZ_EFFECT_STATUE_TO_AOD);           break;
 		case M_EFFECT_FILL_ONE_SHOTS:          strcat(str, SZ_EFFECT_FILL_ONE_SHOTS);          break;
+		case M_EFFECT_ARMA_ARENA:			   strcat(str, SZ_EFFECT_ARMA_ARENA);          break;
 		default: strcat(str, SZ_UNKNOW);
 		}
 		break;
+    case T_SHOT:
+        sprintf(str, "%s: ", SZ_SHOT);
+        switch (t->Thing.Model)
+        {
+        case M_SHOT_STANDARD:                  strcat(str, SZ_SHOT_STANDARD);                  break;
+        case M_SHOT_STANDARD_2:                strcat(str, SZ_SHOT_STANDARD_2);                break;
+        case M_SHOT_STANDARD_3:                strcat(str, SZ_SHOT_STANDARD_3);                break;
+        case M_SHOT_FIREBALL:                  strcat(str, SZ_SHOT_FIREBALL);                  break;
+        case M_SHOT_LIGHTNING:                 strcat(str, SZ_SHOT_LIGHTNING);                 break;
+        case M_SHOT_SUPER_WARRIOR:             strcat(str, SZ_SHOT_SUPER_WARRIOR);             break;
+        case M_SHOT_VOLCANO_FIREBALL_1:        strcat(str, SZ_SHOT_VOLCANO_FIREBALL_1);        break;
+        case M_SHOT_VOLCANO_FIREBALL_2:        strcat(str, SZ_SHOT_VOLCANO_FIREBALL_2);        break;
+        default: strcat(str, SZ_UNKNOW);
+        }
+        break;
 	case T_CREATURE:
 		switch(t->Thing.Model)
 		{
@@ -1958,6 +1993,10 @@ long __stdcall MenuBarProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			DlgSpellsBuildingsToggle();
 			break;
 
+		case ID_HEADER_SCRIPT2:
+			DlgScript2();
+			break;
+
 		case ID_HEADER_SPELLSNOTCHARGING:
 			DlgSpellsNotChargingToggle();
 			break;
@@ -2353,7 +2392,7 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_RED);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_YELLOW);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_GREEN);
-
+            SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_OWNER_HOSTBOT);
 			hItem = GetDlgItem(hWnd, IDC_OBJECT_TYPE);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_PERSON);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_BUILDING);
@@ -2364,7 +2403,7 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_VEHICLE);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SPECIAL);
 			SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_EFFECT);
-
+            SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT);
 			DlgObjectUpdateInfo(hWnd, false);
 		}
 		return 0;
@@ -2472,6 +2511,7 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case IDX_OWNER_RED:     ThingSelected->Thing.Owner = OWNER_RED;     break;
 				case IDX_OWNER_YELLOW:  ThingSelected->Thing.Owner = OWNER_YELLOW;  break;
 				case IDX_OWNER_GREEN:   ThingSelected->Thing.Owner = OWNER_GREEN;   break;
+                case IDX_OWNER_HOSTBOT: ThingSelected->Thing.Owner = OWNER_HOSTBOT;   break;
 				}
 				DlgObjectUpdateInfo(hWnd);
 				DlgInfoUpdate(hDlgInfo);
@@ -2512,6 +2552,9 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case IDX_T_EFFECT:
 					ThingSelected->Thing.Type = T_EFFECT;
 					break;
+                case IDX_T_SHOT:
+                    ThingSelected->Thing.Type = T_SHOT;
+                    break;
 				}
 				memset(&ThingSelected->Thing.Bluff, 0, sizeof(ThingSelected->Thing.Bluff));
 				DlgObjectUpdateInfo(hWnd);
@@ -2643,6 +2686,19 @@ int __stdcall DlgObjectProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					case IDX_M_VEHICLE_AIRSHIP: ThingSelected->Thing.Model = M_VEHICLE_AIRSHIP_1; break;
 					}
 					break;
+                case T_SHOT:
+                    switch (SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
+                    {
+                    case IDX_M_SHOT_STANDARD:                  ThingSelected->Thing.Model = M_SHOT_STANDARD;                  break;
+                    case IDX_M_SHOT_STANDARD_2:                ThingSelected->Thing.Model = M_SHOT_STANDARD_2;                break;
+                    case IDX_M_SHOT_STANDARD_3:                ThingSelected->Thing.Model = M_SHOT_STANDARD_3;                break;
+                    case IDX_M_SHOT_FIREBALL:                  ThingSelected->Thing.Model = M_SHOT_FIREBALL;                  break;
+                    case IDX_M_SHOT_LIGHTNING:                 ThingSelected->Thing.Model = M_SHOT_LIGHTNING;                 break;
+                    case IDX_M_SHOT_SUPER_WARRIOR:             ThingSelected->Thing.Model = M_SHOT_SUPER_WARRIOR;             break;
+                    case IDX_M_SHOT_VOLCANO_FIREBALL_1:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_1;        break;
+                    case IDX_M_SHOT_VOLCANO_FIREBALL_2:        ThingSelected->Thing.Model = M_SHOT_VOLCANO_FIREBALL_2;        break;
+                    }
+                    break;
 				case T_EFFECT:
 					switch(SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
 					{
@@ -2797,6 +2853,7 @@ void DlgObjectUpdateInfo(HWND hWnd, bool lock)
 		case OWNER_RED:    SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_RED, 0);    break;
 		case OWNER_YELLOW: SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_YELLOW, 0); break;
 		case OWNER_GREEN:  SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_GREEN, 0);  break;
+        case OWNER_HOSTBOT:  SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_HOSTBOT, 0);  break;
 		default: SendMessage(hItem, CB_SETCURSEL, IDX_OWNER_NEUTRAL, 0);
 		}
 
@@ -3051,6 +3108,25 @@ _scenery_skip_rotate:
 					EnableWindow(hItem, true);
 				}
 				break;
+
+            case T_SHOT:
+                SendMessage(hItem, CB_SETCURSEL, IDX_T_SHOT, 0);
+                DlgObjectSetEffectList(hWnd);
+                hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
+                EnableWindow(hItem, true);
+                switch (ThingSelected->Thing.Model)
+                {
+                case IDX_M_SHOT_STANDARD:                  SendMessage(hItem, CB_SETCURSEL, M_SHOT_STANDARD, 0);                  break;
+                case IDX_M_SHOT_STANDARD_2:                SendMessage(hItem, CB_SETCURSEL, M_SHOT_STANDARD_2, 0);                break;
+                case IDX_M_SHOT_STANDARD_3:                SendMessage(hItem, CB_SETCURSEL, M_SHOT_STANDARD_3, 0);                break;
+                case IDX_M_SHOT_FIREBALL:                  SendMessage(hItem, CB_SETCURSEL, M_SHOT_FIREBALL, 0);                  break;
+                case IDX_M_SHOT_LIGHTNING:                 SendMessage(hItem, CB_SETCURSEL, M_SHOT_LIGHTNING, 0);                 break;
+                case IDX_M_SHOT_SUPER_WARRIOR:             SendMessage(hItem, CB_SETCURSEL, M_SHOT_SUPER_WARRIOR, 0);             break;
+                case IDX_M_SHOT_VOLCANO_FIREBALL_1:        SendMessage(hItem, CB_SETCURSEL, M_SHOT_VOLCANO_FIREBALL_1, 0);        break;
+                case IDX_M_SHOT_VOLCANO_FIREBALL_2:        SendMessage(hItem, CB_SETCURSEL, M_SHOT_VOLCANO_FIREBALL_2, 0);        break;
+                }
+                break;
+
 			default: SendMessage(hItem, CB_SETCURSEL, -1, 0);
 			}
 			break;
@@ -3078,6 +3154,23 @@ _scenery_skip_rotate:
 			case M_VEHICLE_AIRSHIP_2: SendMessage(hItem, CB_SETCURSEL, IDX_M_VEHICLE_AIRSHIP, 0); break;
 			}
 			break;
+        case T_SHOT:
+            SendMessage(hItem, CB_SETCURSEL, IDX_T_SHOT, 0);
+            DlgObjectSetShotList(hWnd);
+            hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
+            EnableWindow(hItem, true);
+            switch (ThingSelected->Thing.Model)
+            {
+            case M_SHOT_STANDARD:                       SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_STANDARD, 0);                      break;
+            case M_SHOT_STANDARD_2:                     SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_STANDARD_2, 0);                    break;
+            case M_SHOT_STANDARD_3:                     SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_STANDARD_3, 0);                    break;
+            case M_SHOT_FIREBALL:                       SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_FIREBALL, 0);                      break;
+            case M_SHOT_LIGHTNING:                      SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_LIGHTNING, 0);                     break;
+            case M_SHOT_SUPER_WARRIOR:                  SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_SUPER_WARRIOR, 0);                 break;
+            case M_SHOT_VOLCANO_FIREBALL_1:             SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_VOLCANO_FIREBALL_1, 0);            break;
+            case M_SHOT_VOLCANO_FIREBALL_2:             SendMessage(hItem, CB_SETCURSEL, IDX_M_SHOT_VOLCANO_FIREBALL_2, 0);            break;
+            }
+            break;
 		default:
 			SendMessage(hItem, CB_SETCURSEL, -1, 0);
 			hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
@@ -3350,6 +3443,7 @@ void DlgObjectSetEffectList(HWND hWnd)
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_EFFECT_ATLANTIS_INVOKE);
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_EFFECT_STATUE_TO_AOD);
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_EFFECT_FILL_ONE_SHOTS);
+	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_EFFECT_ARMA_ARENA);
 }
 
 
@@ -3377,6 +3471,25 @@ void DlgObjectSetVehicleList(HWND hWnd)
 	SendMessage(hItem, CB_RESETCONTENT, 0, 0);
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_VEHICLE_BOAT);
 	SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_VEHICLE_AIRSHIP);
+}
+
+void DlgObjectSetShotList(HWND hWnd)
+{
+    if (!hWnd) return;
+
+    //
+
+    HWND hItem = GetDlgItem(hWnd, IDC_OBJECT_MODEL);
+    if (!hItem) return;
+    SendMessage(hItem, CB_RESETCONTENT, 0, 0);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_STANDARD);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_STANDARD_2);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_STANDARD_3);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_FIREBALL);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_LIGHTNING);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_SUPER_WARRIOR);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_VOLCANO_FIREBALL_1);
+    SendMessage(hItem, CB_ADDSTRING, 0, (LPARAM)SZ_SHOT_VOLCANO_FIREBALL_2);
 }
 
 
@@ -3462,8 +3575,18 @@ void DlgObjectNewObj()
 	else
 	{
 		memset(t, 0, sizeof(THING));
-		t->Thing.Type = T_PERSON;
-		t->Thing.Model = M_PERSON_BRAVE;
+
+		if ((ThingSelected != nullptr))
+		{
+			t->Thing.Owner = ThingSelected->Thing.Owner;
+			t->Thing.Type = ThingSelected->Thing.Type;
+			t->Thing.Model = ThingSelected->Thing.Model;
+		}
+		else
+		{
+			t->Thing.Type = T_PERSON;
+			t->Thing.Model = M_PERSON_BRAVE;
+		}
 
 		t->x = (float)(int)fEnginePosX + 0.5f;
 		t->z = (float)(int)fEnginePosZ + 0.5f;
@@ -3704,6 +3827,12 @@ int __stdcall DlgFilterProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			else
 				ObjectFilterFlags &= ~OFF_EFFECT;
 			break;
+        case IDC_FILTER_SHOT:
+            if (IsDlgButtonChecked(hDlgFilter, IDC_FILTER_SHOT) == BST_CHECKED)
+                ObjectFilterFlags |= OFF_SHOT;
+            else
+                ObjectFilterFlags &= ~OFF_SHOT;
+            break;
 		case IDC_FILTER_UNKNOW:
 			if(IsDlgButtonChecked(hDlgFilter, IDC_FILTER_UNKNOW) == BST_CHECKED)
 				ObjectFilterFlags |= OFF_UNKNOW;
@@ -3788,6 +3917,11 @@ void DlgFilterUpdate(HWND hWnd)
 	else
 		CheckDlgButton(hWnd, IDC_FILTER_EFFECT, BST_UNCHECKED);
 
+    if (ObjectFilterFlags & OFF_SHOT)
+        CheckDlgButton(hWnd, IDC_FILTER_SHOT, BST_CHECKED);
+    else
+        CheckDlgButton(hWnd, IDC_FILTER_SHOT, BST_UNCHECKED);
+
 	if(ObjectFilterFlags & OFF_UNKNOW)
 		CheckDlgButton(hWnd, IDC_FILTER_UNKNOW, BST_CHECKED);
 	else
@@ -3813,6 +3947,9 @@ bool DlgFilterIsInFilter(THING *t)
 	case OWNER_GREEN:
 		if(!(ObjectFilterFlags & OFF_GREEN)) return false;
 		break;
+    case OWNER_HOSTBOT:
+        if (!(ObjectFilterFlags & OFF_HOSTBOT)) return false;
+        break;
 	default:
 		if(!(ObjectFilterFlags & OFF_NEUTRAL)) return false;
 	}
@@ -3840,6 +3977,9 @@ bool DlgFilterIsInFilter(THING *t)
 	case T_EFFECT:
 		if(ObjectFilterFlags & OFF_EFFECT) return true;
 		break;
+    case T_SHOT:
+        if (ObjectFilterFlags & OFF_SHOT) return true;
+        break;
 	default:
 		if(ObjectFilterFlags & OFF_UNKNOW) return true;
 	}
@@ -4556,6 +4696,7 @@ int __stdcall DlgLinkProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case OWNER_RED:    dw = COLOR_LIST_RED;    break;
 				case OWNER_YELLOW: dw = COLOR_LIST_YELLOW; break;
 				case OWNER_GREEN:  dw = COLOR_LIST_GREEN;  break;
+                case OWNER_HOSTBOT: dw = COLOR_LIST_NEUTRAL; break;
 				default: dw = COLOR_LIST_NEUTRAL;
 				}
 			}
@@ -4864,6 +5005,7 @@ int __stdcall DlgListProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				case OWNER_RED:    dw = COLOR_LIST_RED;    break;
 				case OWNER_YELLOW: dw = COLOR_LIST_YELLOW; break;
 				case OWNER_GREEN:  dw = COLOR_LIST_GREEN;  break;
+                case OWNER_HOSTBOT: dw = COLOR_LIST_NEUTRAL; break;
 				default: dw = COLOR_LIST_NEUTRAL;
 				}
 			}
@@ -5047,6 +5189,7 @@ void UpdateHeaderDialogs()
 {
 	DlgAlliesUpdate(hDlgAllies);
 	DlgSpellsBuildingsUpdate(hDlgSpellsBuildings);
+	DlgScript2Update(hDlgScript2);
 	DlgSpellsNotChargingUpdate(hDlgSpellsNotCharging);
 	DlgHeaderUpdate(hDlgHeader);
 	DlgObjBankUpdate(hDlgObjBank);
@@ -5091,79 +5234,79 @@ int __stdcall DlgAlliesProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 		// blue
 		case IDC_ALLIES_BLUE_RED:
-			if(LevelHeader.DefaultAllies[0] & TRIBE_RED)
-				LevelHeader.DefaultAllies[0] &= ~TRIBE_RED;
+			if(leveldat->Header.v2.DefaultAllies[0] & TRIBE_RED)
+				leveldat->Header.v2.DefaultAllies[0] &= ~TRIBE_RED;
 			else
-				LevelHeader.DefaultAllies[0] |= TRIBE_RED;
+				leveldat->Header.v2.DefaultAllies[0] |= TRIBE_RED;
 			break;
 		case IDC_ALLIES_BLUE_YELLOW:
-			if(LevelHeader.DefaultAllies[0] & TRIBE_YELLOW)
-				LevelHeader.DefaultAllies[0] &= ~TRIBE_YELLOW;
+			if(leveldat->Header.v2.DefaultAllies[0] & TRIBE_YELLOW)
+				leveldat->Header.v2.DefaultAllies[0] &= ~TRIBE_YELLOW;
 			else
-				LevelHeader.DefaultAllies[0] |= TRIBE_YELLOW;
+				leveldat->Header.v2.DefaultAllies[0] |= TRIBE_YELLOW;
 			break;
 		case IDC_ALLIES_BLUE_GREEN:
-			if(LevelHeader.DefaultAllies[0] & TRIBE_GREEN)
-				LevelHeader.DefaultAllies[0] &= ~TRIBE_GREEN;
+			if(leveldat->Header.v2.DefaultAllies[0] & TRIBE_GREEN)
+				leveldat->Header.v2.DefaultAllies[0] &= ~TRIBE_GREEN;
 			else
-				LevelHeader.DefaultAllies[0] |= TRIBE_GREEN;
+				leveldat->Header.v2.DefaultAllies[0] |= TRIBE_GREEN;
 			break;
 		// red
 		case IDC_ALLIES_RED_BLUE:
-			if(LevelHeader.DefaultAllies[1] & TRIBE_BLUE)
-				LevelHeader.DefaultAllies[1] &= ~TRIBE_BLUE;
+			if(leveldat->Header.v2.DefaultAllies[1] & TRIBE_BLUE)
+				leveldat->Header.v2.DefaultAllies[1] &= ~TRIBE_BLUE;
 			else
-				LevelHeader.DefaultAllies[1] |= TRIBE_BLUE;
+				leveldat->Header.v2.DefaultAllies[1] |= TRIBE_BLUE;
 			break;
 		case IDC_ALLIES_RED_YELLOW:
-			if(LevelHeader.DefaultAllies[1] & TRIBE_YELLOW)
-				LevelHeader.DefaultAllies[1] &= ~TRIBE_YELLOW;
+			if(leveldat->Header.v2.DefaultAllies[1] & TRIBE_YELLOW)
+				leveldat->Header.v2.DefaultAllies[1] &= ~TRIBE_YELLOW;
 			else
-				LevelHeader.DefaultAllies[1] |= TRIBE_YELLOW;
+				leveldat->Header.v2.DefaultAllies[1] |= TRIBE_YELLOW;
 			break;
 		case IDC_ALLIES_RED_GREEN:
-			if(LevelHeader.DefaultAllies[1] & TRIBE_GREEN)
-				LevelHeader.DefaultAllies[1] &= ~TRIBE_GREEN;
+			if(leveldat->Header.v2.DefaultAllies[1] & TRIBE_GREEN)
+				leveldat->Header.v2.DefaultAllies[1] &= ~TRIBE_GREEN;
 			else
-				LevelHeader.DefaultAllies[1] |= TRIBE_GREEN;
+				leveldat->Header.v2.DefaultAllies[1] |= TRIBE_GREEN;
 			break;
 		// yellow
 		case IDC_ALLIES_YELLOW_BLUE:
-			if(LevelHeader.DefaultAllies[2] & TRIBE_BLUE)
-				LevelHeader.DefaultAllies[2] &= ~TRIBE_BLUE;
+			if(leveldat->Header.v2.DefaultAllies[2] & TRIBE_BLUE)
+				leveldat->Header.v2.DefaultAllies[2] &= ~TRIBE_BLUE;
 			else
-				LevelHeader.DefaultAllies[2] |= TRIBE_BLUE;
+				leveldat->Header.v2.DefaultAllies[2] |= TRIBE_BLUE;
 			break;
 		case IDC_ALLIES_YELLOW_RED:
-			if(LevelHeader.DefaultAllies[2] & TRIBE_RED)
-				LevelHeader.DefaultAllies[2] &= ~TRIBE_RED;
+			if(leveldat->Header.v2.DefaultAllies[2] & TRIBE_RED)
+				leveldat->Header.v2.DefaultAllies[2] &= ~TRIBE_RED;
 			else
-				LevelHeader.DefaultAllies[2] |= TRIBE_RED;
+				leveldat->Header.v2.DefaultAllies[2] |= TRIBE_RED;
 			break;
 		case IDC_ALLIES_YELLOW_GREEN:
-			if(LevelHeader.DefaultAllies[2] & TRIBE_GREEN)
-				LevelHeader.DefaultAllies[2] &= ~TRIBE_GREEN;
+			if(leveldat->Header.v2.DefaultAllies[2] & TRIBE_GREEN)
+				leveldat->Header.v2.DefaultAllies[2] &= ~TRIBE_GREEN;
 			else
-				LevelHeader.DefaultAllies[2] |= TRIBE_GREEN;
+				leveldat->Header.v2.DefaultAllies[2] |= TRIBE_GREEN;
 			break;
 		// green
 		case IDC_ALLIES_GREEN_BLUE:
-			if(LevelHeader.DefaultAllies[3] & TRIBE_BLUE)
-				LevelHeader.DefaultAllies[3] &= ~TRIBE_BLUE;
+			if(leveldat->Header.v2.DefaultAllies[3] & TRIBE_BLUE)
+				leveldat->Header.v2.DefaultAllies[3] &= ~TRIBE_BLUE;
 			else
-				LevelHeader.DefaultAllies[3] |= TRIBE_BLUE;
+				leveldat->Header.v2.DefaultAllies[3] |= TRIBE_BLUE;
 			break;
 		case IDC_ALLIES_GREEN_RED:
-			if(LevelHeader.DefaultAllies[3] & TRIBE_RED)
-				LevelHeader.DefaultAllies[3] &= ~TRIBE_RED;
+			if(leveldat->Header.v2.DefaultAllies[3] & TRIBE_RED)
+				leveldat->Header.v2.DefaultAllies[3] &= ~TRIBE_RED;
 			else
-				LevelHeader.DefaultAllies[3] |= TRIBE_RED;
+				leveldat->Header.v2.DefaultAllies[3] |= TRIBE_RED;
 			break;
 		case IDC_ALLIES_GREEN_YELLOW:
-			if(LevelHeader.DefaultAllies[3] & TRIBE_YELLOW)
-				LevelHeader.DefaultAllies[3] &= ~TRIBE_YELLOW;
+			if(leveldat->Header.v2.DefaultAllies[3] & TRIBE_YELLOW)
+				leveldat->Header.v2.DefaultAllies[3] &= ~TRIBE_YELLOW;
 			else
-				LevelHeader.DefaultAllies[3] |= TRIBE_YELLOW;
+				leveldat->Header.v2.DefaultAllies[3] |= TRIBE_YELLOW;
 			break;
 		}
 		return 0;
@@ -5179,80 +5322,230 @@ void DlgAlliesUpdate(HWND hWnd)
 
 	//
 
-	LevelHeader.DefaultAllies[0] |= TRIBE_BLUE;
-	LevelHeader.DefaultAllies[1] |= TRIBE_RED;
-	LevelHeader.DefaultAllies[2] |= TRIBE_YELLOW;
-	LevelHeader.DefaultAllies[3] |= TRIBE_GREEN;
+	leveldat->Header.v2.DefaultAllies[0] |= TRIBE_BLUE;
+	leveldat->Header.v2.DefaultAllies[1] |= TRIBE_RED;
+	leveldat->Header.v2.DefaultAllies[2] |= TRIBE_YELLOW;
+	leveldat->Header.v2.DefaultAllies[3] |= TRIBE_GREEN;
 
 	// blue
 
-	if(LevelHeader.DefaultAllies[0] & TRIBE_RED)
+	if(leveldat->Header.v2.DefaultAllies[0] & TRIBE_RED)
 		CheckDlgButton(hWnd, IDC_ALLIES_BLUE_RED, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_BLUE_RED, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[0] & TRIBE_YELLOW)
+	if(leveldat->Header.v2.DefaultAllies[0] & TRIBE_YELLOW)
 		CheckDlgButton(hWnd, IDC_ALLIES_BLUE_YELLOW, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_BLUE_YELLOW, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[0] & TRIBE_GREEN)
+	if(leveldat->Header.v2.DefaultAllies[0] & TRIBE_GREEN)
 		CheckDlgButton(hWnd, IDC_ALLIES_BLUE_GREEN, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_BLUE_GREEN, BST_UNCHECKED);
 
 	// red
 
-	if(LevelHeader.DefaultAllies[1] & TRIBE_BLUE)
+	if(leveldat->Header.v2.DefaultAllies[1] & TRIBE_BLUE)
 		CheckDlgButton(hWnd, IDC_ALLIES_RED_BLUE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_RED_BLUE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[1] & TRIBE_YELLOW)
+	if(leveldat->Header.v2.DefaultAllies[1] & TRIBE_YELLOW)
 		CheckDlgButton(hWnd, IDC_ALLIES_RED_YELLOW, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_RED_YELLOW, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[1] & TRIBE_GREEN)
+	if(leveldat->Header.v2.DefaultAllies[1] & TRIBE_GREEN)
 		CheckDlgButton(hWnd, IDC_ALLIES_RED_GREEN, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_RED_GREEN, BST_UNCHECKED);
 
 	// yellow
 
-	if(LevelHeader.DefaultAllies[2] & TRIBE_BLUE)
+	if(leveldat->Header.v2.DefaultAllies[2] & TRIBE_BLUE)
 		CheckDlgButton(hWnd, IDC_ALLIES_YELLOW_BLUE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_YELLOW_BLUE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[2] & TRIBE_RED)
+	if(leveldat->Header.v2.DefaultAllies[2] & TRIBE_RED)
 		CheckDlgButton(hWnd, IDC_ALLIES_YELLOW_RED, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_YELLOW_RED, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[2] & TRIBE_GREEN)
+	if(leveldat->Header.v2.DefaultAllies[2] & TRIBE_GREEN)
 		CheckDlgButton(hWnd, IDC_ALLIES_YELLOW_GREEN, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_YELLOW_GREEN, BST_UNCHECKED);
 
 	// green
 
-	if(LevelHeader.DefaultAllies[3] & TRIBE_BLUE)
+	if(leveldat->Header.v2.DefaultAllies[3] & TRIBE_BLUE)
 		CheckDlgButton(hWnd, IDC_ALLIES_GREEN_BLUE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_GREEN_BLUE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[3] & TRIBE_RED)
+	if(leveldat->Header.v2.DefaultAllies[3] & TRIBE_RED)
 		CheckDlgButton(hWnd, IDC_ALLIES_GREEN_RED, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_GREEN_RED, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultAllies[3] & TRIBE_YELLOW)
+	if(leveldat->Header.v2.DefaultAllies[3] & TRIBE_YELLOW)
 		CheckDlgButton(hWnd, IDC_ALLIES_GREEN_YELLOW, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_ALLIES_GREEN_YELLOW, BST_UNCHECKED);
 }
 
+// -=-=- spells / buildings dialog -=-=-
+
+void DlgScript2()
+{
+	if (hDlgScript2)
+	{
+		DestroyWindow(hDlgScript2);
+		hDlgScript2 = 0;
+	}
+	else
+	{
+		hDlgScript2 = CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_SCRIPT2), hMainWnd, DlgScript2Proc, 0);
+		ShowWindow(hDlgScript2, SW_SHOW);
+	}
+}
+
+int __stdcall DlgScript2Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	switch (uMsg)
+	{
+	case WM_INITDIALOG:
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_1, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_2, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_3, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_4, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_5, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_6, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_7, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_8, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_9, EM_LIMITTEXT, 31, 0);
+		SendDlgItemMessage(hWnd, IDC_SCRIPT2_10, EM_LIMITTEXT, 31, 0);
+		DlgScript2Update(hWnd);
+		return 0;
+
+	case WM_CLOSE:
+		DlgScript2();
+		return 0;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDC_SCRIPT2_1:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[0], str);
+			}
+			break;
+		case IDC_SCRIPT2_2:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[1], str);
+			}
+			break;
+		case IDC_SCRIPT2_3:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[2], str);
+			}
+			break;
+		case IDC_SCRIPT2_4:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[3], str);
+			}
+			break;
+		case IDC_SCRIPT2_5:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[4], str);
+			}
+			break;
+		case IDC_SCRIPT2_6:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[5], str);
+			}
+			break;
+		case IDC_SCRIPT2_7:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[6], str);
+			}
+			break;
+		case IDC_SCRIPT2_8:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[7], str);
+			}
+			break;
+		case IDC_SCRIPT2_9:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[8], str);
+			}
+			break;
+		case IDC_SCRIPT2_10:
+			if (EN_KILLFOCUS == HIWORD(wParam))
+			{
+				GetWindowText((HWND)lParam, str, sizeof(str));
+				strcpy(leveldat->Header.Script2[9], str);
+			}
+			break;
+		}
+		return 0;
+	}
+	return 0;
+}
+
+void DlgScript2Update(HWND hWnd) {
+	if (!hWnd) return;
+
+	leveldat->Header.Script2[0][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_1, leveldat->Header.Script2[0]);
+
+	leveldat->Header.Script2[1][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_2, leveldat->Header.Script2[1]);
+
+	leveldat->Header.Script2[2][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_3, leveldat->Header.Script2[2]);
+
+	leveldat->Header.Script2[3][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_4, leveldat->Header.Script2[3]);
+
+	leveldat->Header.Script2[4][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_5, leveldat->Header.Script2[4]);
+
+	leveldat->Header.Script2[5][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_6, leveldat->Header.Script2[5]);
+
+	leveldat->Header.Script2[6][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_7, leveldat->Header.Script2[6]);
+
+	leveldat->Header.Script2[7][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_8, leveldat->Header.Script2[7]);
+
+	leveldat->Header.Script2[8][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_9, leveldat->Header.Script2[8]);
+
+	leveldat->Header.Script2[9][31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_SCRIPT2_10, leveldat->Header.Script2[9]);
+
+}
 
 // -=-=- spells / buildings dialog -=-=-
 
@@ -5289,157 +5582,157 @@ int __stdcall DlgSpellsBuildingsProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
 		// spells
 
 		case IDC_SPELL_BLAST:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_BLAST))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_BLAST);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_BLAST))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_BLAST);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_BLAST);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_BLAST);
 			break;
 		case IDC_SPELL_LIGHTNING:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_LIGHTNING))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_LIGHTNING);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_LIGHTNING))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_LIGHTNING);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_LIGHTNING);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_LIGHTNING);
 			break;
 		case IDC_SPELL_TORNADO:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_TORNADO))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_TORNADO);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_TORNADO))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_TORNADO);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_TORNADO);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_TORNADO);
 			break;
 		case IDC_SPELL_SWARM:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWARM))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_SWARM);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWARM))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_SWARM);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_SWARM);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_SWARM);
 			break;
 		case IDC_SPELL_INVISIBILITY:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_INVISIBILITY))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_INVISIBILITY);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_INVISIBILITY))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_INVISIBILITY);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_INVISIBILITY);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_INVISIBILITY);
 			break;
 		case IDC_SPELL_HYPNOTISM:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_HYPNOTISM))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_HYPNOTISM);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_HYPNOTISM))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_HYPNOTISM);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_HYPNOTISM);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_HYPNOTISM);
 			break;
 		case IDC_SPELL_FIRESTORM:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_FIRESTORM))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_FIRESTORM);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_FIRESTORM))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_FIRESTORM);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_FIRESTORM);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_FIRESTORM);
 			break;
 		case IDC_SPELL_GHOST:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_GHOST_ARMY))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_GHOST_ARMY);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_GHOST_ARMY))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_GHOST_ARMY);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_GHOST_ARMY);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_GHOST_ARMY);
 			break;
 		case IDC_SPELL_ERODE:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_ERODE))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_ERODE);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_ERODE))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_ERODE);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_ERODE);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_ERODE);
 			break;
 		case IDC_SPELL_SWAMP:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWAMP))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_SWAMP);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWAMP))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_SWAMP);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_SWAMP);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_SWAMP);
 			break;
 		case IDC_SPELL_LANDBRIDGE:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_LAND_BRIDGE))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_LAND_BRIDGE);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_LAND_BRIDGE))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_LAND_BRIDGE);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_LAND_BRIDGE);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_LAND_BRIDGE);
 			break;
 		case IDC_SPELL_AOD:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_ANGEL_OF_DEATH))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_ANGEL_OF_DEATH);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_ANGEL_OF_DEATH))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_ANGEL_OF_DEATH);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_ANGEL_OF_DEATH);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_ANGEL_OF_DEATH);
 			break;
 		case IDC_SPELL_EARTHQUAKE:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_EARTHQUAKE))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_EARTHQUAKE);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_EARTHQUAKE))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_EARTHQUAKE);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_EARTHQUAKE);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_EARTHQUAKE);
 			break;
 		case IDC_SPELL_FLATTEN:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_FLATTEN))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_FLATTEN);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_FLATTEN))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_FLATTEN);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_FLATTEN);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_FLATTEN);
 			break;
 		case IDC_SPELL_VOLCANO:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_VOLCANO))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_VOLCANO);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_VOLCANO))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_VOLCANO);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_VOLCANO);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_VOLCANO);
 			break;
 		case IDC_SPELL_CONVERT:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_CONVERT))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_CONVERT);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_CONVERT))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_CONVERT);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_CONVERT);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_CONVERT);
 			break;
 		case IDC_SPELL_MAGICALSHIELD:
-			if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_MAGICAL_SHIELD))
-				LevelHeader.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_MAGICAL_SHIELD);
+			if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_MAGICAL_SHIELD))
+				leveldat->Header.v2.DefaultThings.SpellsAvailable &= ~(1 << M_SPELL_MAGICAL_SHIELD);
 			else
-				LevelHeader.DefaultThings.SpellsAvailable |= (1 << M_SPELL_MAGICAL_SHIELD);
+				leveldat->Header.v2.DefaultThings.SpellsAvailable |= (1 << M_SPELL_MAGICAL_SHIELD);
 			break;
 
 		// buildings
 
 		case IDC_BUILDING_HUT:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_HUT1))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_HUT1);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_HUT1))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_HUT1);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_HUT1);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_HUT1);
 			break;
 		case IDC_BUILDING_TOWER:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TOWER))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_TOWER);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TOWER))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_TOWER);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_TOWER);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_TOWER);
 			break;
 		case IDC_BUILDING_TEMPLE:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TEMPLE))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_TEMPLE);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TEMPLE))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_TEMPLE);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_TEMPLE);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_TEMPLE);
 			break;
 		case IDC_BUILDING_SPY:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_SPY_TRAIN))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_SPY_TRAIN);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_SPY_TRAIN))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_SPY_TRAIN);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_SPY_TRAIN);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_SPY_TRAIN);
 			break;
 		case IDC_BUILDING_WARRIOR:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_WARRIOR_TRAIN))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_WARRIOR_TRAIN);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_WARRIOR_TRAIN))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_WARRIOR_TRAIN);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_WARRIOR_TRAIN);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_WARRIOR_TRAIN);
 			break;
 		case IDC_BUILDING_FIREWARRIOR:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_FIREWARRIOR_TRAIN))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_FIREWARRIOR_TRAIN);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_FIREWARRIOR_TRAIN))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_FIREWARRIOR_TRAIN);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_FIREWARRIOR_TRAIN);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_FIREWARRIOR_TRAIN);
 			break;
 		case IDC_BUILDING_BOAT:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_BOAT_HUT_1))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_BOAT_HUT_1);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_BOAT_HUT_1))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_BOAT_HUT_1);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_BOAT_HUT_1);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_BOAT_HUT_1);
 			break;
 		case IDC_BUILDING_BALLON:
-			if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_AIRSHIP_HUT_1))
-				LevelHeader.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_AIRSHIP_HUT_1);
+			if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_AIRSHIP_HUT_1))
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable &= ~(1 << M_BUILDING_AIRSHIP_HUT_1);
 			else
-				LevelHeader.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_AIRSHIP_HUT_1);
+				leveldat->Header.v2.DefaultThings.BuildingsAvailable |= (1 << M_BUILDING_AIRSHIP_HUT_1);
 			break;
 		}
 		return 0;
@@ -5455,129 +5748,129 @@ void DlgSpellsBuildingsUpdate(HWND hWnd)
 
 	//
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_BLAST))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_BLAST))
 		CheckDlgButton(hWnd, IDC_SPELL_BLAST, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_BLAST, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_LIGHTNING))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_LIGHTNING))
 		CheckDlgButton(hWnd, IDC_SPELL_LIGHTNING, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_LIGHTNING, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_TORNADO))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_TORNADO))
 		CheckDlgButton(hWnd, IDC_SPELL_TORNADO, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_TORNADO, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWARM))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWARM))
 		CheckDlgButton(hWnd, IDC_SPELL_SWARM, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_SWARM, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_INVISIBILITY))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_INVISIBILITY))
 		CheckDlgButton(hWnd, IDC_SPELL_INVISIBILITY, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_INVISIBILITY, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_HYPNOTISM))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_HYPNOTISM))
 		CheckDlgButton(hWnd, IDC_SPELL_HYPNOTISM, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_HYPNOTISM, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_FIRESTORM))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_FIRESTORM))
 		CheckDlgButton(hWnd, IDC_SPELL_FIRESTORM, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_FIRESTORM, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_GHOST_ARMY))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_GHOST_ARMY))
 		CheckDlgButton(hWnd, IDC_SPELL_GHOST, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_GHOST, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_ERODE))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_ERODE))
 		CheckDlgButton(hWnd, IDC_SPELL_ERODE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_ERODE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWAMP))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_SWAMP))
 		CheckDlgButton(hWnd, IDC_SPELL_SWAMP, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_SWAMP, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_LAND_BRIDGE))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_LAND_BRIDGE))
 		CheckDlgButton(hWnd, IDC_SPELL_LANDBRIDGE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_LANDBRIDGE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_ANGEL_OF_DEATH))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_ANGEL_OF_DEATH))
 		CheckDlgButton(hWnd, IDC_SPELL_AOD, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_AOD, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_EARTHQUAKE))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_EARTHQUAKE))
 		CheckDlgButton(hWnd, IDC_SPELL_EARTHQUAKE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_EARTHQUAKE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_FLATTEN))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_FLATTEN))
 		CheckDlgButton(hWnd, IDC_SPELL_FLATTEN, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_FLATTEN, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_VOLCANO))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_VOLCANO))
 		CheckDlgButton(hWnd, IDC_SPELL_VOLCANO, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_VOLCANO, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_CONVERT))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_CONVERT))
 		CheckDlgButton(hWnd, IDC_SPELL_CONVERT, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_CONVERT, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsAvailable & (1 << M_SPELL_MAGICAL_SHIELD))
+	if(leveldat->Header.v2.DefaultThings.SpellsAvailable & (1 << M_SPELL_MAGICAL_SHIELD))
 		CheckDlgButton(hWnd, IDC_SPELL_MAGICALSHIELD, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_MAGICALSHIELD, BST_UNCHECKED);
 
 	//
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_HUT1))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_HUT1))
 		CheckDlgButton(hWnd, IDC_BUILDING_HUT, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_HUT, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TOWER))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TOWER))
 		CheckDlgButton(hWnd, IDC_BUILDING_TOWER, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_TOWER, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TEMPLE))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_TEMPLE))
 		CheckDlgButton(hWnd, IDC_BUILDING_TEMPLE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_TEMPLE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_SPY_TRAIN))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_SPY_TRAIN))
 		CheckDlgButton(hWnd, IDC_BUILDING_SPY, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_SPY, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_WARRIOR_TRAIN))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_WARRIOR_TRAIN))
 		CheckDlgButton(hWnd, IDC_BUILDING_WARRIOR, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_WARRIOR, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_FIREWARRIOR_TRAIN))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_FIREWARRIOR_TRAIN))
 		CheckDlgButton(hWnd, IDC_BUILDING_FIREWARRIOR, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_FIREWARRIOR, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_BOAT_HUT_1))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_BOAT_HUT_1))
 		CheckDlgButton(hWnd, IDC_BUILDING_BOAT, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_BOAT, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_AIRSHIP_HUT_1))
+	if(leveldat->Header.v2.DefaultThings.BuildingsAvailable & (1 << M_BUILDING_AIRSHIP_HUT_1))
 		CheckDlgButton(hWnd, IDC_BUILDING_BALLON, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BUILDING_BALLON, BST_UNCHECKED);
@@ -5617,100 +5910,100 @@ int __stdcall DlgSpellsNotChargingProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 		switch(wParam)
 		{
 		case IDC_SPELL_BLAST:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_BLAST - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_BLAST - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_BLAST - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_BLAST - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_BLAST - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_BLAST - 1));
 			break;
 		case IDC_SPELL_LIGHTNING:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LIGHTNING - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_LIGHTNING - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LIGHTNING - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_LIGHTNING - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_LIGHTNING - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_LIGHTNING - 1));
 			break;
 		case IDC_SPELL_TORNADO:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_TORNADO - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_TORNADO - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_TORNADO - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_TORNADO - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_TORNADO - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_TORNADO - 1));
 			break;
 		case IDC_SPELL_SWARM:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWARM - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_SWARM - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWARM - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_SWARM - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_SWARM - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_SWARM - 1));
 			break;
 		case IDC_SPELL_INVISIBILITY:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_INVISIBILITY - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_INVISIBILITY - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_INVISIBILITY - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_INVISIBILITY - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_INVISIBILITY - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_INVISIBILITY - 1));
 			break;
 		case IDC_SPELL_HYPNOTISM:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_HYPNOTISM - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_HYPNOTISM - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_HYPNOTISM - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_HYPNOTISM - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_HYPNOTISM - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_HYPNOTISM - 1));
 			break;
 		case IDC_SPELL_FIRESTORM:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FIRESTORM - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_FIRESTORM - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FIRESTORM - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_FIRESTORM - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_FIRESTORM - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_FIRESTORM - 1));
 			break;
 		case IDC_SPELL_ERODE:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ERODE - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_ERODE - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ERODE - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_ERODE - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_ERODE - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_ERODE - 1));
 			break;
 		case IDC_SPELL_SWAMP:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWAMP - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_SWAMP - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWAMP - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_SWAMP - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_SWAMP - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_SWAMP - 1));
 			break;
 		case IDC_SPELL_LANDBRIDGE:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LAND_BRIDGE - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_LAND_BRIDGE - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LAND_BRIDGE - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_LAND_BRIDGE - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_LAND_BRIDGE - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_LAND_BRIDGE - 1));
 			break;
 		case IDC_SPELL_AOD:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ANGEL_OF_DEATH - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_ANGEL_OF_DEATH - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ANGEL_OF_DEATH - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_ANGEL_OF_DEATH - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_ANGEL_OF_DEATH - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_ANGEL_OF_DEATH - 1));
 			break;
 		case IDC_SPELL_EARTHQUAKE:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_EARTHQUAKE - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_EARTHQUAKE - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_EARTHQUAKE - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_EARTHQUAKE - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_EARTHQUAKE - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_EARTHQUAKE - 1));
 			break;
 		case IDC_SPELL_FLATTEN:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FLATTEN - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_FLATTEN - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FLATTEN - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_FLATTEN - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_FLATTEN - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_FLATTEN - 1));
 			break;
 		case IDC_SPELL_VOLCANO:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_VOLCANO - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_VOLCANO - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_VOLCANO - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_VOLCANO - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_VOLCANO - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_VOLCANO - 1));
 			break;
 		case IDC_SPELL_CONVERT:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_CONVERT - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_CONVERT - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_CONVERT - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_CONVERT - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_CONVERT - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_CONVERT - 1));
 			break;
 		case IDC_SPELL_MAGICALSHIELD:
-			if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_MAGICAL_SHIELD - 1)))
-				LevelHeader.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_MAGICAL_SHIELD - 1));
+			if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_MAGICAL_SHIELD - 1)))
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging &= ~(1 << (M_SPELL_MAGICAL_SHIELD - 1));
 			else
-				LevelHeader.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_MAGICAL_SHIELD - 1));
+				leveldat->Header.v2.DefaultThings.SpellsNotCharging |= (1 << (M_SPELL_MAGICAL_SHIELD - 1));
 			break;
 		}
 		return 0;
@@ -5726,89 +6019,89 @@ void DlgSpellsNotChargingUpdate(HWND hWnd)
 
 	//
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_BLAST - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_BLAST - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_BLAST, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_BLAST, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LIGHTNING - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LIGHTNING - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_LIGHTNING, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_LIGHTNING, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_TORNADO - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_TORNADO - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_TORNADO, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_TORNADO, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWARM - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWARM - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_SWARM, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_SWARM, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_INVISIBILITY - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_INVISIBILITY - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_INVISIBILITY, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_INVISIBILITY, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_HYPNOTISM - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_HYPNOTISM - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_HYPNOTISM, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_HYPNOTISM, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FIRESTORM - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FIRESTORM - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_FIRESTORM, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_FIRESTORM, BST_UNCHECKED);
 
 	/*
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_GHOST_ARMY - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_GHOST_ARMY - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_GHOST_ARMY, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_GHOST_ARMY, BST_UNCHECKED);
 	*/
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ERODE - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ERODE - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_ERODE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_ERODE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWAMP - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_SWAMP - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_SWAMP, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_SWAMP, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LAND_BRIDGE - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_LAND_BRIDGE - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_LANDBRIDGE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_LANDBRIDGE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ANGEL_OF_DEATH - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_ANGEL_OF_DEATH - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_AOD, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_AOD, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_EARTHQUAKE - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_EARTHQUAKE - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_EARTHQUAKE, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_EARTHQUAKE, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FLATTEN - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_FLATTEN - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_FLATTEN, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_FLATTEN, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_VOLCANO - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_VOLCANO - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_VOLCANO, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_VOLCANO, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_CONVERT - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_CONVERT - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_CONVERT, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_CONVERT, BST_UNCHECKED);
 
-	if(LevelHeader.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_MAGICAL_SHIELD - 1)))
+	if(leveldat->Header.v2.DefaultThings.SpellsNotCharging & (1 << (M_SPELL_MAGICAL_SHIELD - 1)))
 		CheckDlgButton(hWnd, IDC_SPELL_MAGICALSHIELD, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_SPELL_MAGICALSHIELD, BST_UNCHECKED);
@@ -5840,6 +6133,7 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_INITDIALOG:
 		SendDlgItemMessage(hWnd, IDC_HEADER_LEVEL_NAME, EM_LIMITTEXT, 31, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_N_PLAYERS, EM_LIMITTEXT, 3, 0);
+        SendDlgItemMessage(hWnd, IDC_HEADER_CP_BLUE, EM_LIMITTEXT, 3, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_CP_RED, EM_LIMITTEXT, 3, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_CP_YELLOW, EM_LIMITTEXT, 3, 0);
 		SendDlgItemMessage(hWnd, IDC_HEADER_CP_GREEN, EM_LIMITTEXT, 3, 0);
@@ -5857,7 +6151,7 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if(EN_KILLFOCUS == HIWORD(wParam))
 			{
 				GetWindowText((HWND)lParam, str, sizeof(str));
-                strcpy(LevelHeader.Name, str);
+                strcpy(leveldat->Header.v2.Name, str);
 			}
 			break;
 
@@ -5872,12 +6166,12 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 1) i = 1;
 						else if(i > 4) i = 4;
-						LevelHeader.NumPlayers = i;
+						leveldat->Header.v2.NumPlayers = i;
 					}
 				}
 				break;
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", LevelHeader.NumPlayers);
+				sprintf(str, "%d", leveldat->Header.v2.NumPlayers);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -5887,9 +6181,9 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if(HIWORD(wParam) == BN_CLICKED)
 			{
 				if(IsDlgButtonChecked(hWnd, IDC_HEADER_FOG) == BST_CHECKED)
-					LevelHeader.LevelFlags |= LEVEL_FLAGS_USE_FOG;
+					leveldat->Header.v2.LevelFlags |= LEVEL_FLAGS_USE_FOG;
 				else
-					LevelHeader.LevelFlags &= ~LEVEL_FLAGS_USE_FOG;
+					leveldat->Header.v2.LevelFlags &= ~LEVEL_FLAGS_USE_FOG;
 			}
 			break;
 
@@ -5897,9 +6191,9 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if(HIWORD(wParam) == BN_CLICKED)
 			{
 				if(IsDlgButtonChecked(hWnd, IDC_HEADER_GOD) == BST_CHECKED)
-					LevelHeader.LevelFlags |= LEVEL_FLAGS_SHAMAN_OMNI;
+					leveldat->Header.v2.LevelFlags |= LEVEL_FLAGS_SHAMAN_OMNI;
 				else
-					LevelHeader.LevelFlags &= ~LEVEL_FLAGS_SHAMAN_OMNI;
+					leveldat->Header.v2.LevelFlags &= ~LEVEL_FLAGS_SHAMAN_OMNI;
 			}
 			break;
 
@@ -5907,11 +6201,45 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if(HIWORD(wParam) == BN_CLICKED)
 			{
 				if(IsDlgButtonChecked(hWnd, IDC_HEADER_NO_GUEST) == BST_CHECKED)
-					LevelHeader.LevelFlags |= LEVEL_FLAGS_NO_GUEST;
+					leveldat->Header.v2.LevelFlags |= LEVEL_FLAGS_NO_GUEST;
 				else
-					LevelHeader.LevelFlags &= ~LEVEL_FLAGS_NO_GUEST;
+					leveldat->Header.v2.LevelFlags &= ~LEVEL_FLAGS_NO_GUEST;
 			}
 			break;
+
+		case IDC_HEADER_NO_REINCARNATE_TIME:
+			if (HIWORD(wParam) == BN_CLICKED)
+			{
+				if (IsDlgButtonChecked(hWnd, IDC_HEADER_NO_REINCARNATE_TIME) == BST_CHECKED)
+					leveldat->Header.v2.LevelFlags |= LEVEL_NO_REINCARNATE_TIME;
+				else
+					leveldat->Header.v2.LevelFlags &= ~LEVEL_NO_REINCARNATE_TIME;
+			}
+			break;
+
+        case IDC_HEADER_CP_BLUE:
+            switch (HIWORD(wParam))
+            {
+            case EN_CHANGE:
+            {
+                GetWindowText((HWND)lParam, str, sizeof(str));
+                int i;
+                if (GetInt(str, &i))
+                {
+                    if (i < 0) i = 0;
+                    else if (i > 255) i = 255;
+                    leveldat->Header.v2.BlueComputerPlayerIndex = i;
+                    leveldat->Header.ComputerPlayerIndex[0] = i;
+                }
+            }
+            break;
+
+            case EN_KILLFOCUS:
+                sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[0]);
+                SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
+                break;
+            }
+            break;
 
 		case IDC_HEADER_CP_RED:
 			switch(HIWORD(wParam))
@@ -5924,13 +6252,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
-						LevelHeader.ComputerPlayerIndex[0] = i;
+                        leveldat->Header.v2.OldComputerPlayerIndex[0] = i;
+						leveldat->Header.ComputerPlayerIndex[1] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", LevelHeader.ComputerPlayerIndex[0]);
+				sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[1]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -5947,13 +6276,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
-						LevelHeader.ComputerPlayerIndex[1] = i;
+                        leveldat->Header.v2.OldComputerPlayerIndex[1] = i;
+						leveldat->Header.ComputerPlayerIndex[2] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", LevelHeader.ComputerPlayerIndex[1]);
+				sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[2]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -5970,13 +6300,14 @@ int __stdcall DlgHeaderProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					{
 						if(i < 0) i = 0;
 						else if(i > 255) i = 255;
-						LevelHeader.ComputerPlayerIndex[2] = i;
+                        leveldat->Header.v2.OldComputerPlayerIndex[2] = i;
+						leveldat->Header.ComputerPlayerIndex[3] = i;
 					}
 				}
 				break;
 
 			case EN_KILLFOCUS:
-				sprintf(str, "%d", LevelHeader.ComputerPlayerIndex[2]);
+				sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[3]);
 				SendMessage((HWND)lParam, WM_SETTEXT, 0, (LPARAM)str);
 				break;
 			}
@@ -5995,35 +6326,43 @@ void DlgHeaderUpdate(HWND hWnd)
 
 	//
 
-	LevelHeader.Name[31] = 0; // no overflow
-	SetDlgItemText(hWnd, IDC_HEADER_LEVEL_NAME, LevelHeader.Name);
+	leveldat->Header.v2.Name[31] = 0; // no overflow
+	SetDlgItemText(hWnd, IDC_HEADER_LEVEL_NAME, leveldat->Header.v2.Name);
 
-	sprintf(str, "%d", LevelHeader.NumPlayers);
+	sprintf(str, "%d", leveldat->Header.v2.NumPlayers);
 	SetDlgItemText(hWnd, IDC_HEADER_N_PLAYERS, str);
 
-	sprintf(str, "%d", LevelHeader.ComputerPlayerIndex[0]);
+    sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[0]);
+    SetDlgItemText(hWnd, IDC_HEADER_CP_BLUE, str);
+
+	sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[1]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_RED, str);
 
-	sprintf(str, "%d", LevelHeader.ComputerPlayerIndex[1]);
+	sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[2]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_YELLOW, str);
 
-	sprintf(str, "%d", LevelHeader.ComputerPlayerIndex[2]);
+	sprintf(str, "%d", leveldat->Header.ComputerPlayerIndex[3]);
 	SetDlgItemText(hWnd, IDC_HEADER_CP_GREEN, str);
 
-	if(LevelHeader.LevelFlags & LEVEL_FLAGS_USE_FOG)
+	if(leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_USE_FOG)
 		CheckDlgButton(hWnd, IDC_HEADER_FOG, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_HEADER_FOG, BST_UNCHECKED);
 
-	if(LevelHeader.LevelFlags & LEVEL_FLAGS_SHAMAN_OMNI)
+	if(leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_SHAMAN_OMNI)
 		CheckDlgButton(hWnd, IDC_HEADER_GOD, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_HEADER_GOD, BST_UNCHECKED);
 
-	if(LevelHeader.LevelFlags & LEVEL_FLAGS_NO_GUEST)
+	if(leveldat->Header.v2.LevelFlags & LEVEL_FLAGS_NO_GUEST)
 		CheckDlgButton(hWnd, IDC_HEADER_NO_GUEST, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_HEADER_NO_GUEST, BST_UNCHECKED);
+
+	if (leveldat->Header.v2.LevelFlags & LEVEL_NO_REINCARNATE_TIME)
+		CheckDlgButton(hWnd, IDC_HEADER_NO_REINCARNATE_TIME, BST_CHECKED);
+	else
+		CheckDlgButton(hWnd, IDC_HEADER_NO_REINCARNATE_TIME, BST_UNCHECKED);
 }
 
 
@@ -6048,7 +6387,7 @@ void DlgObjBankPaint(HDC hdc)
 {
 	HBITMAP hbmp = 0;
 
-	switch(LevelHeader.ObjectsBankNum)
+	switch(leveldat->Header.v2.ObjectsBankNum)
 	{
 	case 0: hbmp = hBank0; break;
 	case 2: hbmp = hBank2; break;
@@ -6078,7 +6417,7 @@ void DlgObjBankUpdate(HWND hWnd)
 	HWND hItem = GetDlgItem(hWnd, IDC_OBJ_BANK);
 	if(hItem)
 	{
-		switch(LevelHeader.ObjectsBankNum)
+		switch(leveldat->Header.v2.ObjectsBankNum)
 		{
 		case 0: SendMessage(hItem, CB_SETCURSEL, 0, 0); break;
 		case 2: SendMessage(hItem, CB_SETCURSEL, 1, 0); break;
@@ -6138,14 +6477,14 @@ int __stdcall DlgObjBankProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		switch(SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0))
 		{
-		case 0: LevelHeader.ObjectsBankNum = 0; break;
-		case 1: LevelHeader.ObjectsBankNum = 2; break;
-		case 2: LevelHeader.ObjectsBankNum = 3; break;
-		case 3: LevelHeader.ObjectsBankNum = 4; break;
-		case 4: LevelHeader.ObjectsBankNum = 5; break;
-		case 5: LevelHeader.ObjectsBankNum = 6; break;
-		case 6: LevelHeader.ObjectsBankNum = 7; break;
-		default: LevelHeader.ObjectsBankNum = 0;
+		case 0: leveldat->Header.v2.ObjectsBankNum = 0; break;
+		case 1: leveldat->Header.v2.ObjectsBankNum = 2; break;
+		case 2: leveldat->Header.v2.ObjectsBankNum = 3; break;
+		case 3: leveldat->Header.v2.ObjectsBankNum = 4; break;
+		case 4: leveldat->Header.v2.ObjectsBankNum = 5; break;
+		case 5: leveldat->Header.v2.ObjectsBankNum = 6; break;
+		case 6: leveldat->Header.v2.ObjectsBankNum = 7; break;
+		default: leveldat->Header.v2.ObjectsBankNum = 0;
 		}
 
 		EngineSetTreeType();
@@ -6184,7 +6523,7 @@ void DlgMapTypePaint(HDC hdc)
 {
 	HBITMAP hbmp = 0;
 
-	switch(LevelHeader.LevelType)
+	switch(leveldat->Header.v2.LevelType)
 	{
 	case 0: hbmp = hMap0; break;
 	case 1: hbmp = hMap1; break;
@@ -6243,7 +6582,7 @@ void DlgMapTypeUpdate(HWND hWnd)
 	HWND hItem = GetDlgItem(hWnd, IDC_MAP_TYPE);
 	if(hItem)
 	{
-		int i = LevelHeader.LevelType;
+		int i = leveldat->Header.v2.LevelType;
 		if(i >= 0 && i <= 35)
 			SendMessage(hItem, CB_SETCURSEL, i, 0);
 		else
@@ -6326,9 +6665,9 @@ int __stdcall DlgMapTypeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		int i = SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0);
 		if(i >= 0 && i <= 35)
-			LevelHeader.LevelType = i;
+			leveldat->Header.v2.LevelType = i;
 		else
-			LevelHeader.LevelType = 0;
+			leveldat->Header.v2.LevelType = 0;
 
 		{
 			HDC hdc = GetDC(hWnd);
@@ -6382,7 +6721,7 @@ void DlgInfoUpdate(HWND hWnd)
 
 	//
 
-	SetDlgItemText(hWnd, IDC_INFO_LEVEL_NAME, LevelHeader.Name);
+	SetDlgItemText(hWnd, IDC_INFO_LEVEL_NAME, leveldat->Header.v2.Name);
 
 	strcpy(str, szLevel);
 	PathStripPath(str);
@@ -6853,6 +7192,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 		t1 = OWNER_YELLOW;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN1) == BST_CHECKED)
 		t1 = OWNER_GREEN;
+    else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT1) == BST_CHECKED)
+        t2 = OWNER_HOSTBOT;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL1) == BST_CHECKED)
 		t1 = OWNER_NEUTRAL;
 	else
@@ -6866,6 +7207,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 		t2 = OWNER_YELLOW;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN2) == BST_CHECKED)
 		t2 = OWNER_GREEN;
+    else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT2) == BST_CHECKED)
+        t2 = OWNER_HOSTBOT;
 	else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL2) == BST_CHECKED)
 		t2 = OWNER_NEUTRAL;
 	else
@@ -6881,6 +7224,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 			t3 = OWNER_YELLOW;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN3) == BST_CHECKED)
 			t3 = OWNER_GREEN;
+        else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT3) == BST_CHECKED)
+            t2 = OWNER_HOSTBOT;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL3) == BST_CHECKED)
 			t3 = OWNER_NEUTRAL;
 		else
@@ -6894,6 +7239,8 @@ void DlgSwapTribeSwap(HWND hWnd)
 			t4 = OWNER_YELLOW;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_GREEN4) == BST_CHECKED)
 			t4 = OWNER_GREEN;
+        else if (IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_HOSTBOT4) == BST_CHECKED)
+            t2 = OWNER_HOSTBOT;
 		else if(IsDlgButtonChecked(hWnd, IDC_SWAPTRIBE_NEUTRAL4) == BST_CHECKED)
 			t4 = OWNER_NEUTRAL;
 		else
@@ -6942,6 +7289,10 @@ int __stdcall DlgSwapTribeProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		case IDC_SWAPTRIBE_YELLOW2:
 		case IDC_SWAPTRIBE_GREEN2:
 		case IDC_SWAPTRIBE_NEUTRAL2:
+        case IDC_SWAPTRIBE_HOSTBOT1:
+        case IDC_SWAPTRIBE_HOSTBOT2:
+        case IDC_SWAPTRIBE_HOSTBOT3:
+        case IDC_SWAPTRIBE_HOSTBOT4:
 		case IDC_SWAPTRIBE_BLUE3:
 		case IDC_SWAPTRIBE_RED3:
 		case IDC_SWAPTRIBE_YELLOW3:
@@ -7005,7 +7356,7 @@ void DlgMarkersUpdate(HWND hWnd)
 		sprintf(str, "%d", MarkerSelected);
 		SetDlgItemText(hWnd, IDC_MARKERS_N, str);
 
-		sprintf(str, "%d, %d", (LevelHeader.Markers[MarkerSelected] & 0xFF), (LevelHeader.Markers[MarkerSelected] >> 8));
+		sprintf(str, "%d, %d", (leveldat->Header.v2.Markers[MarkerSelected] & 0xFF), (leveldat->Header.v2.Markers[MarkerSelected] >> 8));
 		SetDlgItemText(hWnd, IDC_MARKERS_POS, str);
 	}
 }
@@ -7614,7 +7965,7 @@ bool DlgAIAttribSaveAs()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	memset(filename, 0, sizeof(filename));
 
 	OPENFILENAME ofn;
@@ -7655,7 +8006,7 @@ bool DlgAIAttribOpen()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	memset(filename, 0, sizeof(filename));
 
 	OPENFILENAME ofn;
@@ -8001,7 +8352,7 @@ void DlgAIScriptLog()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szAIScriptLog);
 
 	OPENFILENAME ofn;
@@ -8032,7 +8383,7 @@ void DlgAIScriptSrc()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szAIScriptSrc);
 
 	OPENFILENAME ofn;
@@ -8097,7 +8448,7 @@ void DlgAIScriptDst()
 	char filename[MAX_PATH],
 		 strInitDir[MAX_PATH];
 
-	GetCurrentDirectory(sizeof(strInitDir), strInitDir);
+	GetUserDocumentsDirectory(strInitDir);
 	strcpy(filename, szAIScriptDst);
 
 	OPENFILENAME ofn;

@@ -14,8 +14,9 @@ http://alacn.dnsalias.org:8080/
 #include "log.h"
 #include "3ds.h"
 #include "dialogs.h"
+#include "user_storage.h"
 
-
+std::vector<THINGSAVE> Objects;
 
 
 LPDIRECTDRAW7			lpDD			= 0;
@@ -73,10 +74,10 @@ POINT					ptCursor,
 						ptCaptured;
 MOUSEBUTTON				MouseButton				= MouseButtonLeft;
 WORD					wEngineGround[GROUND_X_SIZE * GROUND_Z_SIZE];
-LEVELHEADER				LevelHeader;
+LEVELDATv3				*leveldat;
 MARKER					Markers[256];
 int						MarkerSelected = -1;
-LEVELVERSION			LevelVersion = { 0x0B, "ALACN Populous World Editor", __DATE__ ", " __TIME__, 0 };
+LEVELVERSION			LevelVersion = { 0x0B, "ALACN Populous World Editor v3", __DATE__ ", " __TIME__, 0 };
 GROUNDHEIGHT			GroundHeight[VIEW_RANGE_2][VIEW_RANGE_2];
 float					fEnginePosX				= 0,
 						fEnginePosY				= 5.5f,
@@ -95,7 +96,8 @@ D3DLIGHT7				lightLandscape,
 						lightObjects;
 int						GroundEditBrushSize		= 3,
 						GroundEditBrushSpeed	= 4,
-						ObjectsCount			= 0;
+						ObjectsCount			= 0,
+						LevelFormatMode			= LEVEL_FORMAT_MODE_V3;
 
 const int GroundEditBrushSizeList[BRUSH_SIZE_MAX-BRUSH_SIZE_MIN+1] = {
 	30000, 25000, 20000, 15000, 10000, 7000, 5000, 2500, 1000
@@ -504,6 +506,9 @@ long EnginePrepare()
 	dwScreenWidthN = GetSystemMetrics(SM_CXSCREEN);
 	dwScreenHeightN = GetSystemMetrics(SM_CYSCREEN);
 
+	leveldat = (LEVELDATv3*)malloc(sizeof(LEVELDATv3));
+	memset(leveldat, 0, sizeof(LEVELDATv3));
+
 	memset(&mtrlNormal, 0, sizeof(mtrlNormal));
 	mtrlNormal.diffuse.r  =
 	mtrlNormal.diffuse.g  =
@@ -570,6 +575,10 @@ long EngineFinish()
 	EngineDestroyObjects();
 
 	while(Textures) EngineDestroyTexture(Textures);
+
+	if (leveldat) {
+		free(leveldat);
+	}
 
 	while(ScreenInfo)
 	{
@@ -1248,7 +1257,7 @@ long EngineDrawFrameRate()
 
 long EngineDrawLandscape()
 {
-	if(dwEngineFlags & EF_WIREFRAME_LAND) lpD3DDevice->SetRenderState(D3DRENDERSTATE_FILLMODE, D3DFILL_WIREFRAME);
+	if (dwEngineFlags & EF_WIREFRAME_LAND) lpD3DDevice->SetRenderState(D3DRENDERSTATE_FILLMODE, D3DFILL_WIREFRAME);
 
 	lpD3DDevice->SetTransform(D3DTRANSFORMSTATE_VIEW, &matEngineView);
 	lpD3DDevice->SetTransform(D3DTRANSFORMSTATE_WORLD, &matIdentify);
@@ -1283,37 +1292,49 @@ long EngineDrawLandscape()
 	int x = (int)fEnginePosX - VIEW_RANGE,
 		z = (int)fEnginePosZ - VIEW_RANGE;
 
-	for(int az = 0; az < VIEW_RANGE_2 - 1; az++, z++, x = (int)fEnginePosX - VIEW_RANGE)
-	for(int ax = 0; ax < VIEW_RANGE_2 - 1; ax++, x++)
+	for (int az = 0; az < VIEW_RANGE_2 - 1; az++, z++, x = (int)fEnginePosX - VIEW_RANGE)
+		for (int ax = 0; ax < VIEW_RANGE_2 - 1; ax++, x++)
+		{
+			v[0].x = (float)(x + 1);
+			v[0].z = (float)z;
+			v[0].y = GroundHeight[ax + 1][az].height;
+			v[0].color = GroundHeight[ax + 1][az].color;
+
+			v[1].x = (float)x;
+			v[1].z = (float)z;
+			v[1].y = GroundHeight[ax][az].height;
+			v[1].color = GroundHeight[ax][az].color;
+
+			v[2].x = (float)(x + 1);
+			v[2].z = (float)(z + 1);
+			v[2].y = GroundHeight[ax + 1][az + 1].height;
+			v[2].color = GroundHeight[ax + 1][az + 1].color;
+
+			v[3] = v[2];
+
+			v[4] = v[1];
+
+			v[5].x = (float)x;
+			v[5].z = (float)(z + 1);
+			v[5].y = GroundHeight[ax][az + 1].height;
+			v[5].color = GroundHeight[ax][az + 1].color;
+
+			lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF_COLORVERTEX, v, 6, 0);
+		}
+
+#if USE_FOG
+	bool inSphericalView = (fEnginePosY < MAX_SPERICAL_POS_Y);
+	if (inSphericalView)
 	{
-		v[0].x = (float)(x + 1);
-		v[0].z = (float)z;
-		v[0].y = GroundHeight[ax + 1][az].height;
-		v[0].color = GroundHeight[ax + 1][az].color;
-
-		v[1].x = (float)x;
-		v[1].z = (float)z;
-		v[1].y = GroundHeight[ax][az].height;
-		v[1].color = GroundHeight[ax][az].color;
-
-		v[2].x = (float)(x + 1);
-		v[2].z = (float)(z + 1);
-		v[2].y = GroundHeight[ax + 1][az + 1].height;
-		v[2].color = GroundHeight[ax + 1][az + 1].color;
-
-		v[3] = v[2];
-
-		v[4] = v[1];
-
-		v[5].x = (float)x;
-		v[5].z = (float)(z + 1);
-		v[5].y = GroundHeight[ax][az + 1].height;
-		v[5].color = GroundHeight[ax][az + 1].color;
-
-		lpD3DDevice->DrawPrimitive(D3DPT_TRIANGLELIST, FVF_COLORVERTEX, v, 6, 0);
+		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, true);
 	}
+	else
+	{
+		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, false);
+	}
+#endif
 
-	if(dwEngineFlags & EF_GRID_SEE_THROUGH)
+	if((dwEngineFlags & EF_GRID_SEE_THROUGH) && inSphericalView)
 	{
 #if USE_FOG
 		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, false);
@@ -1780,7 +1801,7 @@ _skip:
 		}
 	}
 
-	if(dwEngineFlags & EF_GRID_SEE_THROUGH)
+	if((dwEngineFlags & EF_GRID_SEE_THROUGH) && inSphericalView)
 	{
 #if USE_FOG
 		lpD3DDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, true);
@@ -2312,6 +2333,9 @@ long EngineDrawObjects()
 				case T_EFFECT:
 					lpD3DDevice->SetTexture(0, txEffect->lpDDSTexture);
 					goto draw_2d_small;
+                case T_SHOT:
+                    lpD3DDevice->SetTexture(0, txEffect->lpDDSTexture);
+                    goto draw_2d_small;
 				case T_CREATURE:
 					if(thing->Thing.Model == M_CREATURE_EAGLE)
 					{
@@ -2430,7 +2454,7 @@ skip:;
 
 				Markers[MarkerSelected].x = (float)bx + 0.5f;
 				Markers[MarkerSelected].z = (float)bz + 0.5f;
-				LevelHeader.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
+				leveldat->Header.v2.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
 				Markers[MarkerSelected].ex = cx;
 				Markers[MarkerSelected].ez = cz;
 				Markers[MarkerSelected].ey = cy;
@@ -2569,6 +2593,122 @@ long EngineDrawMiniMap()
 }
 
 
+long EngineLoadLevelV3(char *filename)
+{
+	EngineNewMap();
+
+	// -=-=- .dat -=-=-
+
+	HANDLE h = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		return -1;
+	}
+
+	memset(leveldat, 0, sizeof(LEVELDATv3));
+
+	Objects.clear();
+
+	dwRW = 0;
+	ReadFile(h, leveldat, sizeof(LEVELDATv3), &dwRW, 0);
+	if(dwRW != sizeof(LEVELDATv3))
+	{
+		CloseHandle(h);
+		sprintf(str, SZ_ERR_READERROR, filename);
+		LogWrite(str);
+		EngineNewMap();
+		return -1;
+	}
+
+	const size_t MAGIC_SIZE = 5;
+	const char MAGICDEF[MAGIC_SIZE] = { 'L','E','V','L','3' };
+	for (int i = 0; i < MAGIC_SIZE; i++) {
+		if (leveldat->MAGIC[i] != MAGICDEF[i]) {
+			CloseHandle(h);
+			sprintf(str, SZ_ERR_MAGIC_MISMATCH, filename);
+			LogWrite(str);
+
+			// MAGIC IS WRONG! Lets try V2 next
+			return EngineLoadLevel(filename);
+		}
+	}
+
+	for (int i = 0; i < leveldat->Header.MaxNumObjects; i++) {
+		THINGSAVE t;
+		dwRW = 0;
+		ReadFile(h, &t, sizeof(THINGSAVE), &dwRW, 0);
+		if (dwRW != sizeof(THINGSAVE))
+		{
+			CloseHandle(h);
+			sprintf(str, SZ_ERR_READERROR, filename);
+			LogWrite(str);
+			EngineNewMap();
+			return -1;
+		}
+		Objects.push_back(t);
+	}
+
+	memcpy(wEngineGround, leveldat->GroundHeight, sizeof(wEngineGround));
+
+	DWORD dw = 0;
+	THING *thing;
+	UWORD idx = 1;
+
+	for(int a = 0; a < Objects.size(); a++)
+	{
+		if(Objects[a].Model != 0)
+		{
+			thing = new THING;
+			memset(thing, 0, sizeof(THING));
+			memcpy(&thing->Thing, &Objects[a], sizeof(THINGSAVE));
+			thing->x = (float)((thing->Thing.PosX >> 8) / 2) + 0.5f;
+			thing->z = (float)((thing->Thing.PosZ >> 8) / 2) + 0.5f;
+			thing->Idx = idx;
+
+			if(thing->Thing.Type == T_EFFECT && thing->Thing.Model == M_EFFECT_LAND_BRIDGE)
+			{
+				thing->LandBridge.x = (float)(((thing->Thing.Bluff[0] & 0xFFFF) >> 8) / 2) + 0.5f;
+				thing->LandBridge.z = (float)(((thing->Thing.Bluff[1] & 0xFFFF) >> 8) / 2) + 0.5f;
+			}
+			else if(thing->Thing.Type == T_PERSON && thing->Thing.Model == M_PERSON_SHAMAN && thing->Thing.Owner == OWNER_BLUE)
+			{
+				fEnginePosX = thing->x;
+				fEnginePosZ = thing->z;
+			}
+
+			LINK(Things, thing);
+			ObjectsCount++;
+		}
+		idx++;
+	}
+
+	DlgObjectIdxToLink();
+	CloseHandle(h);
+
+	for(int a = 0; a < 256; a++)
+	{
+		Markers[a].x = (float)((leveldat->Header.v2.Markers[a] & 0xFF) / 2) + 0.5f;
+		Markers[a].z = (float)((leveldat->Header.v2.Markers[a] >> 8) / 2) + 0.5f;
+	}
+	// -=-=-
+
+	EngineSetTreeType();
+
+	DlgObjectUpdateInfo(hDlgObject);
+	UpdateHeaderDialogs();
+	DlgMarkersUpdate(hDlgMarkers);
+	
+	EngineUpdateView();
+	EngineUpdateMiniMap();
+
+	strcpy(szLevel, filename);
+	DlgInfoUpdate(hDlgInfo);
+
+	LevelFormatMode = LEVEL_FORMAT_MODE_V3;
+	return S_OK;
+}
+
+
 long EngineLoadLevel(char *filename)
 {
 	EngineNewMap();
@@ -2578,22 +2718,22 @@ long EngineLoadLevel(char *filename)
 	HANDLE h = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if(h == INVALID_HANDLE_VALUE)
 	{
-		/*
-		sprintf(str, SZ_ERR_CREATEFILE, filename);
-		LogWrite(str);
-		*/
+		//
+		//sprintf(str, SZ_ERR_CREATEFILE, filename);
+		//LogWrite(str);
+		//
 		return -1;
 	}
 
-	LEVELDAT *leveldat;
-	leveldat = (LEVELDAT*)malloc(sizeof(LEVELDAT));
-	memset(leveldat, 0, sizeof(LEVELDAT));
+	LEVELDATv2 *level2dat;
+	level2dat = (LEVELDATv2*)malloc(sizeof(LEVELDATv2));
+	memset(level2dat, 0, sizeof(LEVELDATv2));
 
 	dwRW = 0;
-	ReadFile(h, leveldat, sizeof(LEVELDAT), &dwRW, 0);
-	if(dwRW != sizeof(LEVELDAT))
+	ReadFile(h, level2dat, sizeof(LEVELDATv2), &dwRW, 0);
+	if(dwRW != sizeof(LEVELDATv2))
 	{
-		free(leveldat);
+		free(level2dat);
 		CloseHandle(h);
 
 		sprintf(str, SZ_ERR_READERROR, filename);
@@ -2603,19 +2743,19 @@ long EngineLoadLevel(char *filename)
 		return -1;
 	}
 
-	memcpy(wEngineGround, leveldat->GroundHeight, sizeof(wEngineGround));
+	memcpy(wEngineGround, level2dat->GroundHeight, sizeof(wEngineGround));
 
 	DWORD dw = 0;
 	THING *thing;
 	UWORD idx = 1;
 
-	for(int a = 0; a < MAX_THINGS; a++)
+	for(int a = 0; a < MAX_V2_THINGS; a++)
 	{
-		if(leveldat->Things[a].Model != 0)
+		if(level2dat->Things[a].Model != 0)
 		{
 			thing = new THING;
 			memset(thing, 0, sizeof(THING));
-			memcpy(&thing->Thing, &leveldat->Things[a], sizeof(THINGSAVE));
+			memcpy(&thing->Thing, &level2dat->Things[a], sizeof(THINGSAVE));
 			thing->x = (float)((thing->Thing.PosX >> 8) / 2) + 0.5f;
 			thing->z = (float)((thing->Thing.PosZ >> 8) / 2) + 0.5f;
 			thing->Idx = idx;
@@ -2639,7 +2779,7 @@ long EngineLoadLevel(char *filename)
 
 	DlgObjectIdxToLink();
 
-	free(leveldat);
+	free(level2dat);
 
 	//
 
@@ -2665,8 +2805,8 @@ long EngineLoadLevel(char *filename)
 	}
 
 	dwRW = 0;
-	ReadFile(h, &LevelHeader, sizeof(LevelHeader), &dwRW, 0);
-	if(dwRW != sizeof(LevelHeader))
+	ReadFile(h, &leveldat->Header.v2, sizeof(leveldat->Header.v2), &dwRW, 0);
+	if (dwRW == 0)
 	{
 		CloseHandle(h);
 
@@ -2680,10 +2820,17 @@ long EngineLoadLevel(char *filename)
 
 	CloseHandle(h);
 
+    // Populate the computer player indices from the old computer player indices.
+    leveldat->Header.ComputerPlayerIndex[0] = leveldat->Header.v2.BlueComputerPlayerIndex;
+    for (int i = 1; i < 4; ++i)
+    {
+        leveldat->Header.ComputerPlayerIndex[i] = leveldat->Header.v2.OldComputerPlayerIndex[i - 1];
+    }
+
 	for(int a = 0; a < 256; a++)
 	{
-		Markers[a].x = (float)((LevelHeader.Markers[a] & 0xFF) / 2) + 0.5f;
-		Markers[a].z = (float)((LevelHeader.Markers[a] >> 8) / 2) + 0.5f;
+		Markers[a].x = (float)((leveldat->Header.v2.Markers[a] & 0xFF) / 2) + 0.5f;
+		Markers[a].z = (float)((leveldat->Header.v2.Markers[a] >> 8) / 2) + 0.5f;
 	}
 
 _skip:
@@ -2703,12 +2850,104 @@ _skip:
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
 
+	LevelFormatMode = LEVEL_FORMAT_MODE_V2;
+	return S_OK;
+}
+
+
+long EngineSaveLevelV3(char *filename)
+{
+	// -=-=- .dat -=-=-
+
+	HANDLE h = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if(h == INVALID_HANDLE_VALUE)
+	{
+		sprintf(str, SZ_ERR_CREATEFILE, filename);
+		LogWrite(str);
+		return -1;
+	}
+
+	// idxs
+	DlgObjectLinkToIdx();
+
+	memcpy(leveldat->GroundHeight, wEngineGround, sizeof(wEngineGround));
+	Objects.clear();
+	THINGSAVE ts;
+
+	THING *t = Things;
+	if(t) do
+	{
+		memcpy(&ts, &t->Thing, sizeof(THINGSAVE));
+		Objects.push_back(ts);
+		t = t->Next;
+	}
+	while(t != Things);
+
+	// Level 2 Spec
+	leveldat->Header.MaxNumObjects = Objects.size();
+	leveldat->Header.MaxNumPlayers = 4;// Players.
+	leveldat->Header.MaxAltPoints  = 128 * 128;
+	leveldat->Header.Version	   = 1;
+
+	dwRW = 0;
+	WriteFile(h, leveldat, sizeof(LEVELDATv3), &dwRW, 0);
+
+	if(dwRW != sizeof(LEVELDATv3))
+	{
+		CloseHandle(h);
+
+		sprintf(str, SZ_ERR_WRITEERROR, filename);
+		LogWrite(str);
+
+		return -1;
+	}
+
+	for (int i = 0; i < Objects.size(); i++) {
+		dwRW = 0;
+		WriteFile(h, &Objects[i], sizeof(THINGSAVE), &dwRW, 0);
+		if (dwRW != sizeof(THINGSAVE))
+		{
+			CloseHandle(h);
+
+			sprintf(str, SZ_ERR_WRITEERROR, filename);
+			LogWrite(str);
+
+			return -1;
+		}
+	}
+
+	CloseHandle(h);
+
+    // Populate the computer player indices from the old computer player indices.
+    leveldat->Header.ComputerPlayerIndex[0] = leveldat->Header.v2.BlueComputerPlayerIndex;
+    for (int i = 1; i < 4; ++i)
+    {
+        leveldat->Header.ComputerPlayerIndex[i] = leveldat->Header.v2.OldComputerPlayerIndex[i - 1];
+    }
+
+    for (int a = 0; a < 256; a++)
+    {
+        Markers[a].x = (float)((leveldat->Header.v2.Markers[a] & 0xFF) / 2) + 0.5f;
+        Markers[a].z = (float)((leveldat->Header.v2.Markers[a] >> 8) / 2) + 0.5f;
+    }
+
+	strcpy(szLevel, filename);
+	DlgInfoUpdate(hDlgInfo);
+
+	LevelFormatMode = LEVEL_FORMAT_MODE_V3;
 	return S_OK;
 }
 
 
 long EngineSaveLevel(char *filename)
 {
+	//level2 compatibility check
+	if (ObjectsCount > MAX_V2_THINGS) {
+		if (ModalMsg(SZ_CONFIRM_MAX_L2_OBJECTS, APPNAME, MB_ICONWARNING | MB_YESNO | MB_DEFBUTTON2) == IDYES) {
+			return EngineSaveLevelV3(filename);
+		}
+	}
+
 	// -=-=- .dat -=-=-
 
 	HANDLE h = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
@@ -2725,28 +2964,35 @@ long EngineSaveLevel(char *filename)
 
 	//
 
-	LEVELDAT *leveldat;
-	leveldat = (LEVELDAT*)malloc(sizeof(LEVELDAT));
-	memset(leveldat, 0, sizeof(LEVELDAT));
+	LEVELDATv2 *level2dat;
+	level2dat = (LEVELDATv2*)malloc(sizeof(LEVELDATv2));
+	memset(level2dat, 0, sizeof(LEVELDATv2));
 
-	memcpy(leveldat->GroundHeight, wEngineGround, sizeof(wEngineGround));
+	memcpy(level2dat->GroundHeight, wEngineGround, sizeof(wEngineGround));
 
-	THINGSAVE *ts = leveldat->Things;
+	THINGSAVE *ts = level2dat->Things;
 
 	THING *t = Things;
+	int savedThings = 0;
 	if(t) do
 	{
 		memcpy(ts++, &t->Thing, sizeof(THINGSAVE));
+		savedThings++;
 		t = t->Next;
+
+		//if we reached the max things supported by v2, bail out
+		if (savedThings == MAX_V2_THINGS) {
+			break;
+		}
 	}
 	while(t != Things);
 
 	dwRW = 0;
-	WriteFile(h, leveldat, sizeof(LEVELDAT), &dwRW, 0);
+	WriteFile(h, level2dat, sizeof(LEVELDATv2), &dwRW, 0);
 
-	free(leveldat);
+	free(level2dat);
 
-	if(dwRW != sizeof(LEVELDAT))
+	if(dwRW != sizeof(LEVELDATv2))
 	{
 		CloseHandle(h);
 
@@ -2784,8 +3030,8 @@ long EngineSaveLevel(char *filename)
 	}
 
 	dwRW = 0;
-	WriteFile(h, &LevelHeader, sizeof(LevelHeader), &dwRW, 0);
-	if(dwRW != sizeof(LevelHeader))
+	WriteFile(h, &leveldat->Header.v2, sizeof(leveldat->Header.v2), &dwRW, 0);
+	if(dwRW != sizeof(leveldat->Header.v2))
 	{
 		CloseHandle(h);
 
@@ -2835,6 +3081,7 @@ _skip:
 	strcpy(szLevel, filename);
 	DlgInfoUpdate(hDlgInfo);
 
+	LevelFormatMode = LEVEL_FORMAT_MODE_V2;
 	return S_OK;
 }
 
@@ -2878,17 +3125,21 @@ long EngineUpdateView()
 		GroundHeight[ax][az].color = LANDSCAPE_COLORS[w];
 
 #if SPHERICAL_WORLD
-		// optimizations screw up at powf
-		//float f = sqrtf(powf((float)x - fEnginePosX, 2.0f) + powf((float)z - fEnginePosZ, 2.0f));
-		//GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
-		
-		float f, f1, f2;
-		f1 = (float)x - fEnginePosX;
-		f1 = f1 * f1;
-		f2 = (float)z - fEnginePosZ;
-		f2 = f2 * f2;
-		f = sqrtf(f1 + f2);
-		GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
+		if (fEnginePosY <= MAX_SPERICAL_POS_Y)
+		{
+
+			// optimizations screw up at powf
+			//float f = sqrtf(powf((float)x - fEnginePosX, 2.0f) + powf((float)z - fEnginePosZ, 2.0f));
+			//GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
+
+			float f, f1, f2;
+			f1 = (float)x - fEnginePosX;
+			f1 = f1 * f1;
+			f2 = (float)z - fEnginePosZ;
+			f2 = f2 * f2;
+			f = sqrtf(f1 + f2);
+			GroundHeight[ax][az].height -= f * f * SPHERE_RATIO;
+		}
 #endif
 	}
 
@@ -3220,6 +3471,24 @@ down_skip:
 	if(bKeys[VK_RIGHT])
 	{
 		fEngineRotY += (float)dwEngineTick * SPEED_ROT_Y;
+		UpdateView = true;
+	}
+
+	if (bKeys[VK_OEM_PLUS])
+	{
+		if (fEngineRotX > MIN_ROT_X  && fEnginePosY < MAX_SPERICAL_POS_Y)
+			fEngineRotX -= (float)dwEngineTick * SPEED_ROT_X;
+		if (fEnginePosY > MIN_POS_Y)
+			fEnginePosY -= (float)dwEngineTick * SPEED_POS_Y_ZOOM;
+		UpdateView = true;
+	}
+
+	if (bKeys[VK_OEM_MINUS])
+	{
+		if (fEngineRotX < MAX_ROT_X)
+			fEngineRotX += (float)dwEngineTick * SPEED_ROT_X;
+		if (fEnginePosY < MAX_POS_Y)
+			fEnginePosY += (float)dwEngineTick * SPEED_POS_Y_ZOOM;
 		UpdateView = true;
 	}
 
@@ -3824,7 +4093,7 @@ long EngineDrawObj3D(OBJ3D *obj, float x, float y, float z, DWORD angle)
 
 void EngineSetTreeType()
 {
-	switch(LevelHeader.ObjectsBankNum)
+	switch(leveldat->Header.v2.ObjectsBankNum)
 	{
 	case 3:
 		objTree1 = objTree04;
@@ -3856,8 +4125,8 @@ void EngineSetTreeType()
 
 void EngineNewMap()
 {
-	memset(&LevelHeader, 0, sizeof(LevelHeader));
 	memset(&Markers, 0, sizeof(Markers));
+	memset(leveldat, 0, sizeof(LEVELDATv3));
 
 	THING *thing;
 
@@ -3884,27 +4153,45 @@ void EngineNewMap()
 
 	szLevel[0] = 0;
 	DlgInfoUpdate(hDlgInfo);
+
+    const size_t MAGIC_SIZE = 5;
+    const char MAGICDEF[MAGIC_SIZE] = { 'L','E','V','L','3' };
+    memcpy(&leveldat->MAGIC, MAGICDEF, MAGIC_SIZE);
 }
 
 
 void EngineLoadConfig()
 {
 	// tmp map
+	char szTempLevelFfilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_TMP_MAP, szTempLevelFfilePath))
+	{
+		strcpy_s(szTempLevelFfilePath, sizeof(char) * (strlen(SZ_ENGINE_TMP_MAP) + 1), SZ_ENGINE_TMP_MAP);
+	}
 
-	EngineLoadLevel(SZ_ENGINE_TMP_MAP);
+	EngineLoadLevelV3(szTempLevelFfilePath);
 	szLevel[0] = 0;
 
 	// config
+	char szEngineConfigFilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_CONFIG, szEngineConfigFilePath))
+	{
+		strcpy_s(szEngineConfigFilePath, sizeof(char) * (strlen(SZ_ENGINE_CONFIG) + 1), SZ_ENGINE_CONFIG);
+	}
 
 	HANDLE h;
 
-	h = CreateFile(SZ_ENGINE_CONFIG, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	h = CreateFile(szEngineConfigFilePath, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	if(h == INVALID_HANDLE_VALUE)
 	{
 		/*
-		sprintf(str, SZ_ERR_CREATEFILE, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_CREATEFILE, szEngineConfigFilePath);
 		LogWrite(str);
 		*/
+
+		//memcpy(&guidDevice, &guid, sizeof(GUID));
+		//strcpy(szDeviceName, devname);
+
 		return;
 	}
 
@@ -3919,7 +4206,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -3934,7 +4221,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -3949,7 +4236,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -3971,7 +4258,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -3983,7 +4270,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -3995,7 +4282,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4007,7 +4294,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4019,7 +4306,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4031,7 +4318,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4043,7 +4330,7 @@ void EngineLoadConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4069,16 +4356,28 @@ void EngineSaveConfig()
 
 	// tmp map
 
-	EngineSaveLevel(SZ_ENGINE_TMP_MAP);
+	char szTempLevelFfilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_TMP_MAP, szTempLevelFfilePath))
+	{
+		strcpy_s(szTempLevelFfilePath, sizeof(char) * (strlen(SZ_ENGINE_TMP_MAP) + 1), SZ_ENGINE_TMP_MAP);
+	}
+
+	EngineSaveLevelV3(szTempLevelFfilePath);  //the temp file can always be saved in v3 format, it will guarantee no loss
 
 	// config
 
+	char szEngineConfigFilePath[MAX_PATH];
+	if (!GetApplicationUserDataFilePath(SZ_ENGINE_CONFIG, szEngineConfigFilePath))
+	{
+		strcpy_s(szEngineConfigFilePath, sizeof(char) * (strlen(SZ_ENGINE_CONFIG) + 1), SZ_ENGINE_CONFIG);
+	}
+
 	HANDLE h;
 
-	h = CreateFile(SZ_ENGINE_CONFIG, GENERIC_WRITE | GENERIC_READ, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	h = CreateFile(szEngineConfigFilePath, GENERIC_WRITE | GENERIC_READ, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
 	if(h == INVALID_HANDLE_VALUE)
 	{
-		sprintf(str, SZ_ERR_CREATEFILE, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_CREATEFILE, szEngineConfigFilePath);
 		LogWrite(str);
 		return;
 	}
@@ -4091,7 +4390,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4105,7 +4404,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4117,7 +4416,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4131,7 +4430,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4143,7 +4442,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4155,7 +4454,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4167,7 +4466,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4179,7 +4478,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4191,7 +4490,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4203,7 +4502,7 @@ void EngineSaveConfig()
 	{
 		CloseHandle(h);
 
-		sprintf(str, SZ_ERR_READERROR, SZ_ENGINE_CONFIG);
+		sprintf(str, SZ_ERR_READERROR, szEngineConfigFilePath);
 		LogWrite(str);
 
 		return;
@@ -4586,6 +4885,8 @@ void EngineMouseLDown()
 					goto _2d_hit_small;
 				case T_EFFECT:
 					goto _2d_hit_small;
+                case T_SHOT:
+                    goto _2d_hit_small;
 				case T_CREATURE:
 					if(t->Thing.Model == M_CREATURE_EAGLE)
 					{

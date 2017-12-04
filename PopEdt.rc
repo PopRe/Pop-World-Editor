@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include "version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -74,8 +75,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,2,0,0
- PRODUCTVERSION 1,2,0,0
+ FILEVERSION VER_FILE_VERSION
+ PRODUCTVERSION VER_FILE_VERSION
  FILEFLAGSMASK 0x37L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -91,14 +92,14 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "ALACN"
-            VALUE "FileDescription", "Populous World Editor"
-            VALUE "FileVersion", "1, 2, 0, 0"
+            VALUE "FileDescription", "Populous World Editor For Levelv3"
+            VALUE "FileVersion", VER_FILE_VERSION_STR
             VALUE "InternalName", "PopEdt"
             VALUE "LegalCopyright", "ALACN"
             VALUE "LegalTrademarks", "ALACN"
             VALUE "OriginalFilename", "PopEdt.exe"
             VALUE "ProductName", "Populous World Editor"
-            VALUE "ProductVersion", "1, 2, 0, 0"
+            VALUE "ProductVersion", VER_FILE_VERSION_STR
         END
     END
     BLOCK "VarFileInfo"
@@ -299,24 +300,22 @@ BEGIN
     PUSHBUTTON      "Filter",IDC_LIST_FILTER,34,99,50,14
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 150, 118
+IDD_ABOUT DIALOGEX 0, 0, 150, 95
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
-CAPTION "Populous World Editor"
+CAPTION "Populous World Editor For Levelv3"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,49,96,50,14
+    DEFPUSHBUTTON   "OK",IDOK,49,75,50,14
     LTEXT           "programmed by ALACN",IDC_STATIC,7,7,88,8
     LTEXT           "alacn@bol.com.br",IDC_STATIC,7,15,88,8
     LTEXT           "uhahaa@msn.com",IDC_STATIC,7,23,88,8
-    LTEXT           "http://www.strategyplanet.com/populous",IDC_ABOUT_LINK,
+    LTEXT           "http://alacn1.com/populous/",IDC_ABOUT_LINK,
                     7,59,135,8
-    LTEXT           "Version: ---",IDC_ABOUT_VERSION,7,73,135,8
-    LTEXT           "Date: ---",IDC_ABOUT_DATE,8,81,135,8
+    LTEXT           "Version: ---",IDC_ABOUT_VERSION,7,37,135,8
+    LTEXT           "Date: ---",IDC_ABOUT_DATE,8,45,135,8
     ICON            IDI_CN,IDC_STATIC,122,7,21,20
-    LTEXT           "help file written by Khickman",IDC_STATIC,7,37,136,8
-    LTEXT           "khickman@strategyplanet.com",IDC_STATIC,7,45,136,8
 END
 
 IDD_SPELLS_BUILDINGS DIALOGEX 0, 0, 242, 122
@@ -466,7 +465,7 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,78,77,60,10
 END
 
-IDD_HEADER DIALOGEX 0, 0, 155, 119
+IDD_HEADER DIALOGEX 0, 0, 175, 129
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
     WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW
@@ -474,27 +473,61 @@ CAPTION "Header"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "&Level Name",IDC_HEADER_TXT_LEVEL_NAME,7,7,38,8
-    EDITTEXT        IDC_HEADER_LEVEL_NAME,7,17,85,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HEADER_LEVEL_NAME,7,17,105,12,ES_AUTOHSCROLL
     LTEXT           "&Num Players",IDC_HEADER_TXT_N_PLAYERS,7,35,40,8
-    EDITTEXT        IDC_HEADER_N_PLAYERS,7,45,85,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_HEADER_N_PLAYERS,7,45,105,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    GROUPBOX        " &Flags ",IDC_STATIC,7,62,85,49
+    GROUPBOX        " &Flags ",IDC_STATIC,7,62,105,59
     CONTROL         "God Mode",IDC_HEADER_GOD,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,15,75,71,10
     CONTROL         "Fog of War",IDC_HEADER_FOG,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,15,85,71,10
     CONTROL         "No Guest Spells",IDC_HEADER_NO_GUEST,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,15,95,71,10
-    GROUPBOX        " &AI ",IDC_STATIC,100,7,48,105
-    LTEXT           "&Red",IDC_HEADER_TXT_CP_RED,106,19,14,8
-    EDITTEXT        IDC_HEADER_CP_RED,106,29,34,12,ES_AUTOHSCROLL | 
+    CONTROL         "No Reincarnation Time", IDC_HEADER_NO_REINCARNATE_TIME,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,105,91,10
+    GROUPBOX        " &AI ",IDC_STATIC,120,7,48,115
+    LTEXT           "&Blue", IDC_HEADER_TXT_CP_BLUE, 126, 15, 14, 8
+    EDITTEXT        IDC_HEADER_CP_BLUE, 126, 25, 34, 12, ES_AUTOHSCROLL |
                     ES_NUMBER
-    LTEXT           "&Yellow",IDC_HEADER_TXT_CP_YELLOW,106,49,21,8
-    EDITTEXT        IDC_HEADER_CP_YELLOW,106,59,34,12,ES_AUTOHSCROLL | 
+    LTEXT           "&Red",IDC_HEADER_TXT_CP_RED,126,40,14,8
+    EDITTEXT        IDC_HEADER_CP_RED,126,50,34,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    LTEXT           "&Green",IDC_HEADER_TXT_CP_GREEN,106,77,20,8
-    EDITTEXT        IDC_HEADER_CP_GREEN,106,87,34,12,ES_AUTOHSCROLL | 
+    LTEXT           "&Yellow",IDC_HEADER_TXT_CP_YELLOW,126,65,21,8
+    EDITTEXT        IDC_HEADER_CP_YELLOW,126,75,34,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
+    LTEXT           "&Green",IDC_HEADER_TXT_CP_GREEN,126,90,20,8
+    EDITTEXT        IDC_HEADER_CP_GREEN,126,100,34,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+END
+
+IDD_SCRIPT2 DIALOGEX 0, 0, 220, 150
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP |
+WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Script2"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+LTEXT           "&Script 1:", IDC_SCRIPT2_TXT_1, 7, 7, 38, 8
+EDITTEXT        IDC_SCRIPT2_1, 7, 17, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 2:", IDC_SCRIPT2_TXT_2, 7, 35, 38, 8
+EDITTEXT        IDC_SCRIPT2_2, 7, 45, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 3:", IDC_SCRIPT2_TXT_3, 7, 63, 38, 8
+EDITTEXT        IDC_SCRIPT2_3, 7, 73, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 4:", IDC_SCRIPT2_TXT_4, 7, 91, 38, 8
+EDITTEXT        IDC_SCRIPT2_4, 7, 101, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 5:", IDC_SCRIPT2_TXT_5, 7, 119, 38, 8
+EDITTEXT        IDC_SCRIPT2_5, 7, 129, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 6:", IDC_SCRIPT2_TXT_6, 107, 7, 38, 8
+EDITTEXT        IDC_SCRIPT2_6, 107, 17, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 7:", IDC_SCRIPT2_TXT_7, 107, 35, 38, 8
+EDITTEXT        IDC_SCRIPT2_7, 107, 45, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 8:", IDC_SCRIPT2_TXT_8, 107, 63, 38, 8
+EDITTEXT        IDC_SCRIPT2_8, 107, 73, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 9:", IDC_SCRIPT2_TXT_9, 107, 91, 38, 8
+EDITTEXT        IDC_SCRIPT2_9, 107, 101, 85, 12, ES_AUTOHSCROLL
+LTEXT           "&Script 10:", IDC_SCRIPT2_TXT_10, 107, 119, 38, 8
+EDITTEXT        IDC_SCRIPT2_10, 107, 129, 85, 12, ES_AUTOHSCROLL
 END
 
 IDD_OBJ_BANK DIALOGEX 0, 0, 90, 71
@@ -851,6 +884,14 @@ BEGIN
         BOTTOMMARGIN, 112
     END
 
+	IDD_SCRIPT2, DIALOG
+		BEGIN
+		LEFTMARGIN, 7
+		RIGHTMARGIN, 148
+		TOPMARGIN, 7
+		BOTTOMMARGIN, 112
+	END
+
     IDD_OBJ_BANK, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -906,6 +947,7 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 81
     END
+
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -941,9 +983,8 @@ BEGIN
         POPUP "Header"
         BEGIN
             MENUITEM "Available Spells/Buildings",  ID_HEADER_AVAILABLE_SPELLS_BUILDINGS
-
+			MENUITEM "Script2",						ID_HEADER_SCRIPT2
             MENUITEM "Spells not charging",         ID_HEADER_SPELLSNOTCHARGING
-
             MENUITEM "Allies",                      ID_HEADER_ALLIES
             MENUITEM "General",                     ID_HEADER_GENERAL
             MENUITEM "Object Bank",                 ID_HEADER_OBJECTBANK
@@ -1006,7 +1047,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Screen Mode\tF9",             ID_OPTIONS_SCREENMODE
         MENUITEM SEPARATOR
-        MENUITEM "Help\tF1",                    ID_OPTIONS_HELP
         MENUITEM "About",                       ID_OPTIONS_ABOUT
     END
 END

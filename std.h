@@ -1,3 +1,4 @@
+#pragma once
 
 /*
 
@@ -7,11 +8,7 @@ http://alacn.dnsalias.org:8080/
 
 */
 
-#define APPNAME					"Populous World Editor"
-#define POPEDT_VERSION			"1.2.0.0"
-
 #define STR_SIZE  256
-
 
 #define _WIN32_WINDOWS 0x0500
 #pragma comment(lib, "comctl32.lib")
@@ -23,6 +20,7 @@ http://alacn.dnsalias.org:8080/
 #include <assert.h>
 #endif
 #include "resource.h"
+#include "version.h"
 
 #pragma comment(lib, "shlwapi.lib")
 #include <shlwapi.h>
