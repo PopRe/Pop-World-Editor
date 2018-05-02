@@ -16,6 +16,8 @@ http://alacn.dnsalias.org:8080/
 #include "dialogs.h"
 #include "user_storage.h"
 
+bool fMarkerPlaced = false;
+
 std::vector<THINGSAVE> Objects;
 
 
@@ -2426,7 +2428,7 @@ skip:;
 
 	if(fEngineEditMarkers || (dwEngineFlags & EF_SHOW_MARKERS))
 	{
-		if(fCaptured && fMoving && fEngineEditMarkers && (MarkerSelected != -1))
+		if(fCaptured && fMoving && fEngineEditMarkers && (MarkerSelected != -1) || GetAsyncKeyState(VK_LBUTTON) && GetAsyncKeyState(VK_CONTROL))
 		{
 			D3DVECTOR r0, r1;
 			EngineGetPick(&r0, &r1);
@@ -2458,6 +2460,18 @@ skip:;
 				Markers[MarkerSelected].ex = cx;
 				Markers[MarkerSelected].ez = cz;
 				Markers[MarkerSelected].ey = cy;
+			}
+
+			if (GetAsyncKeyState(VK_LBUTTON) && GetAsyncKeyState(VK_CONTROL)) {
+				if (!fMarkerPlaced) {
+					for (int i = 0; i < 256; i += 1) {
+						if (Markers[i].x < 0.6f && Markers[i].z < 0.6f) {
+							MarkerSelected = i;
+							fMarkerPlaced = true;
+							break;
+						}
+					}
+				}
 			}
 
 			DlgMarkersUpdate(hDlgMarkers);
@@ -5115,6 +5129,7 @@ void EngineMouseLUp()
 	if(fCaptured)
 	{
 		EngineMouseReleaseCapture();
+		if(fEngineEditMarkers) fMarkerPlaced = false;
 		if(fEngineEditLand || fEngineEditObjs) EngineUpdateMiniMap();
 	}
 }
