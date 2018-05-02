@@ -2468,6 +2468,7 @@ skip:;
 						if (Markers[i].x < 0.6f && Markers[i].z < 0.6f) {
 							MarkerSelected = i;
 							fMarkerPlaced = true;
+
 							break;
 						}
 					}
