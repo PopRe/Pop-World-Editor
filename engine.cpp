@@ -16,8 +16,6 @@ http://alacn.dnsalias.org:8080/
 #include "dialogs.h"
 #include "user_storage.h"
 
-bool fMarkerPlaced = false;
-
 std::vector<THINGSAVE> Objects;
 
 
@@ -71,7 +69,8 @@ bool					fEngineEditLand			= false,
 						fMoving					= false,
 						fLandEditUpdate			= true,
 						fFlatten				= false,
-						fSmooth					= false;
+						fSmooth					= false,
+						fNewMarkerAdded			= false;
 POINT					ptCursor,
 						ptCaptured;
 MOUSEBUTTON				MouseButton				= MouseButtonLeft;
@@ -2426,9 +2425,21 @@ skip:;
 		while(thing != Things);
 	}
 
-	if(fEngineEditMarkers || (dwEngineFlags & EF_SHOW_MARKERS))
+	if (fEngineEditMarkers || (dwEngineFlags & EF_SHOW_MARKERS))
 	{
-		if(fCaptured && fMoving && fEngineEditMarkers && (MarkerSelected != -1) || GetAsyncKeyState(VK_LBUTTON) && GetAsyncKeyState(VK_CONTROL))
+		if ((GetAsyncKeyState(VK_DELETE) & 0x80000000) && MarkerSelected != -1)
+		{
+			leveldat->Header.v2.Markers[MarkerSelected] = ((0) << 8) | (0);
+
+			Markers[MarkerSelected].x = 0.5f;
+			Markers[MarkerSelected].z = 0.5f;
+			Markers[MarkerSelected].ex = 0.5f;
+			Markers[MarkerSelected].ez = 0.5f;
+			Markers[MarkerSelected].ey = 0.0f;
+
+			DlgMarkersUpdate(hDlgMarkers);
+		}
+		else if (fCaptured && fMoving && fEngineEditMarkers && (MarkerSelected != -1))
 		{
 			D3DVECTOR r0, r1;
 			EngineGetPick(&r0, &r1);
@@ -2436,11 +2447,11 @@ skip:;
 			int sx, sz;
 			float ex, ez;
 
-			if(EngineGetIntersectMapSquare(r0, r1, &sx, &sz, &ex, &ez))
+			if (EngineGetIntersectMapSquare(r0, r1, &sx, &sz, &ex, &ez))
 			{
 				float cx = ex,
-					  cz = ez,
-					  cy = GroundHeight[sx][sz].height + GroundHeight[sx+1][sz].height + GroundHeight[sx][sz+1].height + GroundHeight[sx+1][sz+1].height;
+					cz = ez,
+					cy = GroundHeight[sx][sz].height + GroundHeight[sx + 1][sz].height + GroundHeight[sx][sz + 1].height + GroundHeight[sx + 1][sz + 1].height;
 
 				int bx = (int)cx,
 					bz = (int)cz;
@@ -2449,10 +2460,10 @@ skip:;
 				cz += 0.5f;
 				cy /= 4.0f;
 
-				while(bx < 0) bx += GROUND_X_SIZE;
-				while(bz < 0) bz += GROUND_Z_SIZE;
-				while(bx >= GROUND_X_SIZE) bx -= GROUND_X_SIZE;
-				while(bz >= GROUND_Z_SIZE) bz -= GROUND_Z_SIZE;
+				while (bx < 0) bx += GROUND_X_SIZE;
+				while (bz < 0) bz += GROUND_Z_SIZE;
+				while (bx >= GROUND_X_SIZE) bx -= GROUND_X_SIZE;
+				while (bz >= GROUND_Z_SIZE) bz -= GROUND_Z_SIZE;
 
 				Markers[MarkerSelected].x = (float)bx + 0.5f;
 				Markers[MarkerSelected].z = (float)bz + 0.5f;
@@ -2462,22 +2473,55 @@ skip:;
 				Markers[MarkerSelected].ey = cy;
 			}
 
-			if (GetAsyncKeyState(VK_LBUTTON) && GetAsyncKeyState(VK_CONTROL)) {
-				if (!fMarkerPlaced) {
-					for (int i = 0; i < 256; i += 1) {
-						if (Markers[i].x < 0.6f && Markers[i].z < 0.6f) {
-							MarkerSelected = i;
-							fMarkerPlaced = true;
-							break;
-						}
+			DlgMarkersUpdate(hDlgMarkers);
+		}
+		else if (fCaptured && !fMoving && fEngineEditMarkers && (MarkerSelected == -1) && !fNewMarkerAdded && GetAsyncKeyState(VK_CONTROL))
+		{
+			D3DVECTOR r0, r1;
+			EngineGetPick(&r0, &r1);
+
+			int sx, sz;
+			float ex, ez;
+
+			if (EngineGetIntersectMapSquare(r0, r1, &sx, &sz, &ex, &ez))
+			{
+				float cx = ex,
+					cz = ez,
+					cy = GroundHeight[sx][sz].height + GroundHeight[sx + 1][sz].height + GroundHeight[sx][sz + 1].height + GroundHeight[sx + 1][sz + 1].height;
+
+				int bx = (int)cx,
+					bz = (int)cz;
+
+				cx += 0.5f;
+				cz += 0.5f;
+				cy /= 4.0f;
+
+				while (bx < 0) bx += GROUND_X_SIZE;
+				while (bz < 0) bz += GROUND_Z_SIZE;
+				while (bx >= GROUND_X_SIZE) bx -= GROUND_X_SIZE;
+				while (bz >= GROUND_Z_SIZE) bz -= GROUND_Z_SIZE;
+
+				for (int i = 0; i < 256; i++) {
+					if (Markers[i].x < 0.6f && Markers[i].z < 0.6f) {
+						MarkerSelected = i;
+						fNewMarkerAdded = true;
+						break;
 					}
 				}
+
+				Markers[MarkerSelected].x = (float)bx + 0.5f;
+				Markers[MarkerSelected].z = (float)bz + 0.5f;
+				leveldat->Header.v2.Markers[MarkerSelected] = ((bz * 2) << 8) | (bx * 2);
+				Markers[MarkerSelected].ex = cx;
+				Markers[MarkerSelected].ez = cz;
+				Markers[MarkerSelected].ey = cy;
 			}
 
 			DlgMarkersUpdate(hDlgMarkers);
 		}
 
-		lpD3DDevice->SetTexture(0, txMarker->lpDDSTexture);
+
+lpD3DDevice->SetTexture(0, txMarker->lpDDSTexture);
 
 		for(int a = 255; a > -1; a--)
 		{
@@ -5129,7 +5173,7 @@ void EngineMouseLUp()
 	if(fCaptured)
 	{
 		EngineMouseReleaseCapture();
-		if(fEngineEditMarkers) fMarkerPlaced = false;
+		if(fEngineEditMarkers) fNewMarkerAdded = false;
 		if(fEngineEditLand || fEngineEditObjs) EngineUpdateMiniMap();
 	}
 }
