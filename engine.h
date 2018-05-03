@@ -287,7 +287,8 @@ extern bool						fEngineEditLand,
 								fCaptured,
 								fLandEditUpdate,
 								fFlatten,
-								fSmooth;
+								fSmooth,
+								fNewMarkerAdded;
 extern POINT					ptCursor,
 								ptCaptured;
 extern MOUSEBUTTON				MouseButton;
