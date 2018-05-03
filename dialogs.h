@@ -569,3 +569,4 @@ void DlgAIScriptLog();
 void DlgAIScriptSrc();
 void DlgAIScriptDst();
 
+extern bool fQuickDuplicate;

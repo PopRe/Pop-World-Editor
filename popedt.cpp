@@ -102,6 +102,17 @@ _retry:
 	MSG Msg;
 	while(true)
 	{
+		if ((GetAsyncKeyState(0x4E) & 1) && ThingSelected)
+		{
+			fQuickDuplicate = true;
+			DlgObjectNewObj();
+		}
+
+		if (GetAsyncKeyState(VK_DELETE))
+		{
+			if(ThingSelected) DlgObjectDeleteObj();
+		}
+
 		if(PeekMessage(&Msg, 0, 0, 0, PM_NOREMOVE))
 		{
 			if(!GetMessage(&Msg, 0, 0, 0)) return Msg.wParam;

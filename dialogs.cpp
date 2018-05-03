@@ -46,6 +46,7 @@ HWND hDlgDevice = 0,
 GUID	guidDeviceOld;
 bool	fHwDeviceOld,
 		fFullScreenOld,
+		fQuickDuplicate = false,
 		fEngineActiveOld;
 char	szDeviceNameOld[STR_SIZE];
 DWORD	dwScreenWidthOld,
@@ -3568,7 +3569,12 @@ void DlgObjectNewObj()
 	THING *t;
 	t = new THING;
 
-	if(ThingSelected && ((GetKeyState(VK_LSHIFT) & 0x80000000) || (GetKeyState(VK_RSHIFT) & 0x80000000)))
+	if (fQuickDuplicate && ThingSelected)
+	{
+		memcpy(t, ThingSelected, sizeof(THING));
+		!fQuickDuplicate;
+	}
+	else if(ThingSelected && ((GetKeyState(VK_LSHIFT) & 0x80000000) || (GetKeyState(VK_RSHIFT) & 0x80000000)))
 	{
 		memcpy(t, ThingSelected, sizeof(THING));
 	}
