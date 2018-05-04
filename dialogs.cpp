@@ -2272,6 +2272,16 @@ void DlgBrushUpdate(HWND hWnd)
 		CheckDlgButton(hWnd, IDC_BRUSH_SMOOTH, BST_CHECKED);
 	else
 		CheckDlgButton(hWnd, IDC_BRUSH_SMOOTH, BST_UNCHECKED);
+
+	if (fRaise)
+		CheckDlgButton(hWnd, IDC_BRUSH_ONLY_RAISE, BST_CHECKED);
+	else
+		CheckDlgButton(hWnd, IDC_BRUSH_ONLY_RAISE, BST_UNCHECKED);
+
+	if (fLower)
+		CheckDlgButton(hWnd, IDC_BRUSH_ONLY_LOWER, BST_CHECKED);
+	else
+		CheckDlgButton(hWnd, IDC_BRUSH_ONLY_LOWER, BST_UNCHECKED);
 }
 
 
@@ -2302,7 +2312,11 @@ int __stdcall DlgBrushProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				fFlatten = true;
 				fSmooth = false;
+				fRaise = false;
+				fLower = false;
 				CheckDlgButton(hWnd, IDC_BRUSH_SMOOTH, BST_UNCHECKED);
+				CheckDlgButton(hWnd, IDC_BRUSH_ONLY_RAISE, BST_UNCHECKED);
+				CheckDlgButton(hWnd, IDC_BRUSH_ONLY_LOWER, BST_UNCHECKED);
 			}
 			else
 			{
@@ -2315,11 +2329,45 @@ int __stdcall DlgBrushProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				fSmooth = true;
                 fFlatten = false;
+				fRaise = false;
+				fLower = false;
 				CheckDlgButton(hWnd, IDC_BRUSH_FLATTEN, BST_UNCHECKED);
+				CheckDlgButton(hWnd, IDC_BRUSH_ONLY_RAISE, BST_UNCHECKED);
+				CheckDlgButton(hWnd, IDC_BRUSH_ONLY_LOWER, BST_UNCHECKED);
 			}
 			else
 			{
 				fSmooth = false;
+			}
+		}
+		else if (wParam == IDC_BRUSH_ONLY_RAISE)
+		{
+			if (IsDlgButtonChecked(hWnd, IDC_BRUSH_ONLY_RAISE) == BST_CHECKED)
+			{
+				fRaise = true;
+				fSmooth = false;
+				fFlatten = false;
+				CheckDlgButton(hWnd, IDC_BRUSH_FLATTEN, BST_UNCHECKED);
+				CheckDlgButton(hWnd, IDC_BRUSH_SMOOTH, BST_UNCHECKED);
+			}
+			else
+			{
+				fRaise = false;
+			}
+		}
+		else if (wParam == IDC_BRUSH_ONLY_LOWER)
+		{
+			if (IsDlgButtonChecked(hWnd, IDC_BRUSH_ONLY_LOWER) == BST_CHECKED)
+			{
+				fLower = true;
+				fSmooth = false;
+				fFlatten = false;
+				CheckDlgButton(hWnd, IDC_BRUSH_FLATTEN, BST_UNCHECKED);
+				CheckDlgButton(hWnd, IDC_BRUSH_SMOOTH, BST_UNCHECKED);
+			}
+			else
+			{
+				fLower = false;
 			}
 		}
 		return 0;
@@ -3572,13 +3620,12 @@ void DlgObjectNewObj()
 	if (fQuickDuplicate && ThingSelected)
 	{
 		memcpy(t, ThingSelected, sizeof(THING));
-		!fQuickDuplicate;
 	}
 	else if(ThingSelected && ((GetKeyState(VK_LSHIFT) & 0x80000000) || (GetKeyState(VK_RSHIFT) & 0x80000000)))
 	{
 		memcpy(t, ThingSelected, sizeof(THING));
 	}
-	else
+	else 
 	{
 		memset(t, 0, sizeof(THING));
 

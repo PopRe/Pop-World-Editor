@@ -25,8 +25,8 @@ http://alacn.dnsalias.org:8080/
 #define SZ_CONFIRM_MAX_L2_OBJECTS					"Warning, this map has more objects than supported by Level2\nwould you like to switch to Level3 format instead?\n\nPressing No will result in some objects being lost."
 
 #define SZ_OPENLEVEL_TITLE							"Open Level"
-#define SZ_OPENLEVEL_FILTER							"Populous Levels Dat Files (*.dat)\0*.dat\0All Files (*.*)\0*.*\0\0"
-#define SZ_SAVELEVEL_FILTER							"Populous Level3 Format (*.dat)\0*.dat\0Populous Level2 Format (*.hdr;*.dat)\0*.dat\0\0"
+#define SZ_OPENLEVEL_FILTER							"Populous Levels Dat Files (*.dat)\0levl2*.dat\0All Files (*.*)\0*.*\0\0"
+#define SZ_SAVELEVEL_FILTER							"Populous Level3 Format (*.dat)\0levl2*.dat\0Populous Level2 Format (*.hdr;*.dat)\0levl2*.dat\0\0"
 #define SZ_OPENLEVEL_FAILED							"Open Level Failed"
 #define SZ_SAVELEVEL_TITLE							"Save Level"
 #define SZ_SAVELEVEL_DEFEXT							".dat"
@@ -338,7 +338,7 @@ http://alacn.dnsalias.org:8080/
 
 #define SZ_BRUSH_SIZE_TXT							"Size: %d"
 #define BRUSH_SIZE_MIN								0
-#define BRUSH_SIZE_MAX								8
+#define BRUSH_SIZE_MAX								128
 #define SZ_BRUSH_SPEED_TXT							"Speed: %d"
 #define BRUSH_SPEED_MIN								0
 #define BRUSH_SPEED_MAX								8
