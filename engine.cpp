@@ -72,6 +72,8 @@ bool					fEngineEditLand			= false,
 						fLandEditUpdate			= true,
 						fFlatten				= false,
 						fSmooth					= false,
+						fRaise					= false,
+						fLower					= false,
 						fNewMarkerAdded			= false;
 POINT					ptCursor,
 						ptCaptured;
@@ -1673,24 +1675,28 @@ _skip:
 				}
 				else if(MouseButton == MouseButtonLeft)
 				{
+					if (!fRaise)
+					{
 					m = EngineGetGroundHeight(x, z);
 					az = 0;
-					while(az <= GroundEditBrushSize)
-					{
-						ax = 0;
-						while(ax <= GroundEditBrushSize)
+
+						while (az <= GroundEditBrushSize)
 						{
-							w = EngineGetGroundHeight(x + ax, z + az);
-							if(w != m) b = true;
+							ax = 0;
+							while (ax <= GroundEditBrushSize)
+							{
+								w = EngineGetGroundHeight(x + ax, z + az);
+								if (w != m) b = true;
 
-							/* min progressive
-							if(w < m) m = w;
-							*/
+								/* min progressive
+								if(w < m) m = w;
+								*/
 
-							if(w > m) m = w;
-							ax++;
+								if (w > m) m = w;
+								ax++;
+							}
+							az++;
 						}
-						az++;
 					}
 
 					az = 0;
@@ -1736,24 +1742,28 @@ _skip:
 				}
 				else if(MouseButton == MouseButtonRight)
 				{
+					if (!fLower)
+					{
 					m = EngineGetGroundHeight(x, z);
 					az = 0;
-					while(az <= GroundEditBrushSize)
-					{
-						ax = 0;
-						while(ax <= GroundEditBrushSize)
-						{
-							w = EngineGetGroundHeight(x + ax, z + az);
-							if(w != m) b = true;
-							
-							/* min progressive
-							if(w > m) m = w;
-							*/
 
-							if(w < m) m = w;
-							ax++;
+						while (az <= GroundEditBrushSize)
+						{
+							ax = 0;
+							while (ax <= GroundEditBrushSize)
+							{
+								w = EngineGetGroundHeight(x + ax, z + az);
+								if (w != m) b = true;
+
+								/* min progressive
+								if(w > m) m = w;
+								*/
+
+								if (w < m) m = w;
+								ax++;
+							}
+							az++;
 						}
-						az++;
 					}
 
 					az = 0;
@@ -2429,7 +2439,19 @@ skip:;
 
 	if(fEngineEditMarkers || (dwEngineFlags & EF_SHOW_MARKERS))
 	{
-		if(fCaptured && fMoving && fEngineEditMarkers && (MarkerSelected != -1))
+		if (bKeys[VK_DELETE] && MarkerSelected != -1)
+		{
+			leveldat->Header.v2.Markers[MarkerSelected] = ((0) << 8) | (0);
+
+			Markers[MarkerSelected].x = 0.5f;
+			Markers[MarkerSelected].z = 0.5f;
+			Markers[MarkerSelected].ex = 0.5f;
+			Markers[MarkerSelected].ez = 0.5f;
+			Markers[MarkerSelected].ey = 0.0f;
+
+			DlgMarkersUpdate(hDlgMarkers);
+		}
+		else if(fCaptured && fMoving && fEngineEditMarkers && (MarkerSelected != -1))
 		{
 			D3DVECTOR r0, r1;
 			EngineGetPick(&r0, &r1);
@@ -3540,21 +3562,11 @@ down_skip:
 		UpdateView = true;
 	}
 
-	if (bKeys[VK_DELETE])
-	{
-		if (fEngineEditObjs && ThingSelected)
-		{
-			THING *t = ThingSelected;
-			DlgObjectSelect(0);
-			UNLINK(Things, t);
-			DlgObjectUnlinkObj(t);
-			delete t;
-			ObjectsCount--;
-			DlgObjectUpdateInfo(hDlgObject);
-			EngineUpdateMiniMap();
-			DlgInfoUpdate(hDlgInfo);
-		}
-	}
+	if (bKeys[VK_DELETE] && ThingSelected && fEngineEditObjs) DlgObjectDeleteObj();
+
+	if (bKeys[0x4E] && ThingSelected && !fQuickDuplicate) fQuickDuplicate = !fQuickDuplicate, DlgObjectNewObj();
+
+	if (!bKeys[0x4E] && fQuickDuplicate) fQuickDuplicate = !fQuickDuplicate;
 
 	if(UpdateView)
 	{

@@ -285,6 +285,8 @@
 #define IDC_HEADER_NO_REINCARNATE_TIME  1217
 #define IDC_HEADER_TXT_CP_BLUE          1218
 #define IDC_HEADER_CP_BLUE              1219
+#define IDC_BRUSH_ONLY_RAISE            1220
+#define IDC_BRUSH_ONLY_LOWER            1221
 #define ID_ACCEL_DLGDEVICE              40001
 #define ID_ACCEL_MENUBAR                40002
 #define ID_ACCEL_DLGBRUSH               40003
